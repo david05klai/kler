@@ -88,13 +88,13 @@ def whatsapp(parameters: dict, player=None) -> str:
         if contact_name.lower() in contacts:
             del contacts[contact_name.lower()]
             save_contacts(contacts)
-            return f"Contacto '{contact_name}' eliminado de la base de datos de JARVIS."
+            return f"Contacto '{contact_name}' eliminado de la base de datos de KLER."
         return f"No se encontró ningún contacto con el nombre '{contact_name}'."
 
     elif action == "list_contacts":
         if not contacts:
-            return "No tienes contactos guardados en la base de datos de JARVIS todavía."
-        res = "Contactos guardados en JARVIS:\n"
+            return "No tienes contactos guardados en la base de datos de KLER todavía."
+        res = "Contactos guardados en KLER:\n"
         for k, v in contacts.items():
             res += f"• {v['name']}: {v['phone']}\n"
         return res

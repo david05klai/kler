@@ -8,7 +8,7 @@ from pathlib import Path
 def terminal_agent(parameters: dict, player=None) -> str:
     """
     Ejecuta cualquier comando en la terminal de Windows (PowerShell o CMD).
-    JARVIS puede usar esto para cualquier tarea del sistema operativo:
+    KLER puede usar esto para cualquier tarea del sistema operativo:
     instalar/desinstalar programas, consultar información, ejecutar scripts,
     manejar archivos, redes, configuraciones, etc.
     Soporta elevación UAC en tiempo real si se requieren privilegios de Administrador.
@@ -48,7 +48,7 @@ def terminal_agent(parameters: dict, player=None) -> str:
         is_already_admin = False
 
     if run_as_admin and not is_already_admin:
-        # Se requiere elevación de Administrador pero JARVIS no está elevado
+        # Se requiere elevación de Administrador pero KLER no está elevado
         if player:
             player.write_log("🔑 [Permisos] Solicitando elevación de privilegios UAC de Windows...")
             
@@ -148,7 +148,7 @@ def terminal_agent(parameters: dict, player=None) -> str:
 
         if result.returncode == 0:
             if output:
-                # Salida hasta 3000 chars para que JARVIS tenga contexto suficiente
+                # Salida hasta 3000 chars para que KLER tenga contexto suficiente
                 if len(output) > 3000:
                     output = output[:3000] + "\n...[Salida truncada]"
                 return f"Comando ejecutado exitosamente:\n{output}"

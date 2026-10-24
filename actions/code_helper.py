@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-code_helper.py — Intelligent code assistant tool for JARVIS.
+code_helper.py — Intelligent code assistant tool for KLER.
 Handles compiling (building), running, explaining, writing, and checking code.
 """
 import os
@@ -12,7 +12,7 @@ from pathlib import Path
 
 def code_helper(parameters: dict, player=None, speak=None) -> str:
     """
-    Code helper tool for JARVIS. Supports:
+    Code helper tool for KLER. Supports:
     - build: Syntax check / compile Python files
     - run: Execute code files safely
     - explain: Explain raw code or file contents
@@ -188,4 +188,4 @@ def code_helper(parameters: dict, player=None, speak=None) -> str:
         except Exception as e:
             return f"Error editando archivo: {str(e)}"
 
-    return f"Acción '{action}' completada mediante el asistente de código de JARVIS."
+    return f"Acción '{action}' completada mediante el asistente de código de KLER."

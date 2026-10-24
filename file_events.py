@@ -1,4 +1,4 @@
-"""file_events.py — Clean thread-safe event bus for JARVIS file modifications."""
+"""file_events.py — Clean thread-safe event bus for KLER file modifications."""
 from __future__ import annotations
 import threading
 from dataclasses import dataclass

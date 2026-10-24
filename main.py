@@ -31,7 +31,7 @@ if _gpu_enabled:
     # Enable hardware acceleration backends for Qt
     os.environ["QSG_RHI_BACKEND"] = "d3d11" # Force Direct3D 11 for hardware rendering on Windows
     os.environ["QSG_INFO"] = "1"
-    print("[JARVIS] GPU Acceleration is ENABLED. Offloading RAM rendering workload to GPU.")
+    print("[KLER] GPU Acceleration is ENABLED. Offloading RAM rendering workload to GPU.")
 else:
     # Balanced low-RAM mode: Keep GPU hardware compositing enabled so glowing CSS effects and drop-shadows are rendered beautifully, but limit renderer processes and JS space size.
     os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = (
@@ -45,7 +45,7 @@ else:
         "--disable-sync "
         "--mute-audio"
     )
-    print("[JARVIS] Using Balanced Low RAM GPU-Composited mode for beautiful fluid rendering.")
+    print("[KLER] Using Balanced Low RAM GPU-Composited mode for beautiful fluid rendering.")
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -64,7 +64,7 @@ import traceback
 from pathlib import Path
 
 # --- PARCHE GLOBAL PARA ESCRITURA EN PYAUTOGUI ---
-# Asegura que todas las acciones de escritura de JARVIS sean en minúsculas,
+# Asegura que todas las acciones de escritura de KLER sean en minúsculas,
 # sin tildes, y desactivando Bloq Mayús si el usuario lo dejó encendido.
 try:
     import pyautogui
@@ -451,12 +451,12 @@ def rotate_api_key() -> str:
     return _get_api_key()
 
 
-JARVIS_VOICES = {
+KLER_VOICES = {
     "Aoede":  ("Femenina", "Cálida y sofisticada — ideal para asistente IA"),
     "Kore":   ("Femenina", "Suave y precisa"),
     "Leda":   ("Femenina", "Natural y fluida"),
     "Zephyr": ("Femenina", "Dinámica y expresiva"),
-    "Charon": ("Masculina", "Profunda y seria — voz original de JARVIS"),
+    "Charon": ("Masculina", "Profunda y seria — voz original de KLER"),
     "Puck":   ("Masculina", "Ágil y versátil"),
     "Fenrir": ("Masculina", "Grave y autoritaria"),
     "Orus":   ("Masculina", "Clásica y equilibrada"),
@@ -483,7 +483,7 @@ def _load_system_prompt() -> str:
         return prompt_text
     except Exception:
         return (
-            "You are JARVIS, Tony Stark's AI assistant. "
+            "You are Kler, a personal desktop AI assistant. "
             "Be concise, direct, and always use the provided tools to complete tasks. "
             "Never simulate or guess results — always call the appropriate tool."
         )
@@ -532,7 +532,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "camera_bus",
         "description": (
-            "Controla el subsistema de pilotaje y navegación gestual por cámara de JARVIS. "
+            "Controla el subsistema de pilotaje y navegación gestual por cámara de KLER. "
             "Permite activar, desactivar o alternar el control gestual del mouse usando la webcam en segundo plano."
         ),
         "parameters": {
@@ -549,7 +549,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "jarvis_ui_control",
         "description": (
-            "Control total sobre la ventana principal y los widgets de la interfaz de JARVIS. "
+            "Control total sobre la ventana principal y los widgets de la interfaz de KLER. "
             "Permite minimizar/restaurar la ventana principal, o abrir, cerrar, alternar la visibilidad de cualquier widget del dashboard.\n"
             "Widgets disponibles: weather (clima), spotify (música), system (sistema), "
             "notes (notas), todo (tareas), maps (mapas), image (imágenes), camera (cámara)."
@@ -777,7 +777,7 @@ TOOL_DECLARATIONS = [
     },
     {
         "name": "sleep_mode",
-        "description": "Entra en modo suspensión. Desactiva el micrófono para la IA hasta que el usuario diga 'Oye JARVIS' o 'JARVIS' localmente.",
+        "description": "Entra en modo suspensión. Desactiva el micrófono para la IA hasta que el usuario diga 'Oye KLER' o 'KLER' localmente.",
         "parameters": {
             "type": "OBJECT",
             "properties": {}
@@ -1166,7 +1166,7 @@ TOOL_DECLARATIONS = [
         "description": (
             "Muestra rutas de navegación y mapas interactivos. "
             "Usar para: cómo llegar a un lugar, cuánto tarda, indicaciones paso a paso, "
-            "buscar una dirección en el mapa. Abre mapa JARVIS en Chrome con la ruta marcada. "
+            "buscar una dirección en el mapa. Abre mapa KLER en Chrome con la ruta marcada. "
             "SIEMPRE llamar para cualquier pedido de navegación, rutas o mapas."
         ),
         "parameters": {
@@ -1229,7 +1229,7 @@ TOOL_DECLARATIONS = [
         "description": (
             "Perfil dinámico del usuario — hábitos, preferencias, historial de uso. "
             "Ver perfil, configurar preferencias, ver hábitos aprendidos, guardar notas personales. "
-            "JARVIS aprende automáticamente los patrones del usuario."
+            "KLER aprende automáticamente los patrones del usuario."
         ),
         "parameters": {
             "type": "OBJECT",
@@ -1487,7 +1487,7 @@ TOOL_DECLARATIONS = [
             "Usa Pollinations.ai (gratis, open-source, sin API key) o Gemini. "
             "SIEMPRE llamar cuando el usuario pide 'generame una imagen', 'crea una foto de', "
             "'dibujame', 'haceme una imagen', 'quiero una foto de', o 'mostrame', etc. "
-            "Después de generar, la imagen se muestra automáticamente en el widget de JARVIS."
+            "Después de generar, la imagen se muestra automáticamente en el widget de KLER."
         ),
         "parameters": {
             "type": "OBJECT",
@@ -1495,7 +1495,7 @@ TOOL_DECLARATIONS = [
                 "prompt":       {"type": "STRING",  "description": "Descripción detallada de la imagen a generar"},
                 "count":        {"type": "INTEGER", "description": "Cantidad de imágenes (1-4, default: 1)"},
                 "aspect_ratio": {"type": "STRING",  "description": "Relación de aspecto: 1:1 | 4:3 | 3:4 | 16:9 | 9:16 (default: 1:1)"},
-                "save_path":    {"type": "STRING",  "description": "Carpeta de guardado (default: ~/Pictures/JARVIS_Generadas)"},
+                "save_path":    {"type": "STRING",  "description": "Carpeta de guardado (default: ~/Pictures/KLER_Generadas)"},
             },
             "required": ["prompt"]
         }
@@ -1692,7 +1692,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "screen_vision",
         "description": (
-            "JARVIS puede VER la pantalla del usuario. Captura lo que está en el monitor "
+            "KLER puede VER la pantalla del usuario. Captura lo que está en el monitor "
             "y usa IA (Gemini Vision) para describirlo, responder preguntas, leer texto, "
             "o dar ayuda contextual basada en lo que se está mostrando.\n"
             "SIEMPRE usar cuando el usuario diga: '¿qué estoy viendo?', '¿qué hay en mi pantalla?', "
@@ -1722,10 +1722,10 @@ TOOL_DECLARATIONS = [
     {
         "name": "morning_brief",
         "description": (
-            "Genera el informe matutino inteligente de JARVIS. "
+            "Genera el informe matutino inteligente de KLER. "
             "Incluye saludo personalizado, hora, fecha, clima actual, objetivos activos y consejo del día. "
             "Usar cuando el usuario pida: 'informe del día', 'brief matutino', 'qué hay hoy', "
-            "'resumen del día', 'buenos días JARVIS', o al iniciar el día."
+            "'resumen del día', 'buenos días KLER', o al iniciar el día."
         ),
         "parameters": {
             "type": "object",
@@ -1741,7 +1741,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "vision_guardian",
         "description": (
-            "Controla el Guardian de Visión Ambiental de JARVIS — monitoreo proactivo de pantalla. "
+            "Controla el Guardian de Visión Ambiental de KLER — monitoreo proactivo de pantalla. "
             "Analiza la pantalla periódicamente con IA y ofrece ayuda contextual cuando detecta algo relevante. "
             "Usar cuando el usuario diga: 'activa el guardian', 'desactiva el guardian', "
             "'vigila mi pantalla', 'deja de vigilar', 'analiza mi pantalla ahora', "
@@ -1766,7 +1766,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "accessibility_overlay",
         "description": (
-            "Muestra, oculta o alterna la barra flotante de accesibilidad JARVIS sobre el escritorio. "
+            "Muestra, oculta o alterna la barra flotante de accesibilidad KLER sobre el escritorio. "
             "USAR cuando el usuario diga: 'mostrar barra de accesibilidad', 'abrir panel de accesibilidad', "
             "'activar barra para ciegos', 'cerrar barra', 'ocultar barra de accesibilidad', "
             "'alternar barra', 'barra de accesibilidad'."
@@ -1869,7 +1869,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "tool_creator",
         "description": (
-            "Permite a JARVIS programar e instalar sus propias herramientas. "
+            "Permite a KLER programar e instalar sus propias herramientas. "
             "ÚSALO SIEMPRE que el usuario te pida que aprendas a hacer algo nuevo, o si necesitas una funcionalidad que no tienes preinstalada. "
             "Escribirás el código Python y se instalará automáticamente."
         ),
@@ -2023,7 +2023,7 @@ TOOL_DECLARATIONS = [
     {
         "name": "auto_programmer",
         "description": (
-            "Suite de desarrollo y auto-programación autónoma avanzada. Permite a JARVIS escribir "
+            "Suite de desarrollo y auto-programación autónoma avanzada. Permite a KLER escribir "
             "código Python para nuevas herramientas, validar sintaxis con py_compile, correr tests sintácticos "
             "en un sandbox con traceback detallado, corregir errores e inyectar plugins en caliente."
         ),
@@ -2061,11 +2061,11 @@ TOOL_DECLARATIONS = [
     {
         "name": "self_edit",
         "description": (
-            "Auto-edición de código: JARVIS puede leer, modificar, crear y gestionar sus propios archivos de código fuente. "
+            "Auto-edición de código: KLER puede leer, modificar, crear y gestionar sus propios archivos de código fuente. "
             "Crea backups automáticos antes de cada cambio. "
             "USAR cuando el usuario pida: 'editá tu código', 'cambiá tu prompt', 'agregá esta función', "
             "'modificá tu comportamiento', 'mejorate', 'aprendé a hacer X editando tu código', "
-            "o cuando JARVIS necesite auto-mejorarse, corregir bugs propios o agregar capacidades. "
+            "o cuando KLER necesite auto-mejorarse, corregir bugs propios o agregar capacidades. "
             "Puede editar: main.py, core/prompt.txt, actions/*.py, config/*, o cualquier archivo del proyecto."
         ),
         "parameters": {
@@ -2130,7 +2130,7 @@ class JarvisLive:
     def __init__(self, ui: JarvisUI):
         self.ui             = ui
         self.session        = None
-        self.is_sleeping    = True  # EMPIEZA DORMIDO SIEMPRE, REQUIERE "JARVIS" PARA DESPERTAR
+        self.is_sleeping    = True  # EMPIEZA DORMIDO SIEMPRE, REQUIERE "KLER" PARA DESPERTAR
         # Cargar sensibilidad del micrófono (puerta de ruido) de la configuración
         cfg_keys = {}
         if API_CONFIG_PATH.exists():
@@ -2148,11 +2148,11 @@ class JarvisLive:
             if os.path.exists("config/vosk_model"):
                 model = vosk.Model("config/vosk_model")
                 self.vosk_recognizer = vosk.KaldiRecognizer(model, 16000)
-                print("[JARVIS] Modelo Vosk cargado para Modo Suspensión.")
+                print("[KLER] Modelo Vosk cargado para Modo Suspensión.")
         except Exception as e:
-            print(f"[JARVIS] No se pudo cargar Vosk: {e}")
+            print(f"[KLER] No se pudo cargar Vosk: {e}")
         self.audio_in_queue = None
-        # Iniciar scheduler y motor de reglas en background al arrancar JARVIS
+        # Iniciar scheduler y motor de reglas en background al arrancar KLER
         start_runner(player=ui, speak=None)
         start_rules_runner(player=ui, speak=None)
         self.out_queue      = None
@@ -2188,7 +2188,7 @@ class JarvisLive:
         # Actualizar dinámicamente la puerta de ruido sin reiniciar
         self.noise_gate_threshold = float(cfg.get("mic_sensitivity", 0.003))
         
-        print("[JARVIS] ⚙️ Config actualizada — reconectando sesión...")
+        print("[KLER] ⚙️ Config actualizada — reconectando sesión...")
         self.ui.write_log("SYS: Aplicando nueva configuración...")
         if self._reconnect_event and self._loop:
             self._loop.call_soon_threadsafe(self._reconnect_event.set)
@@ -2206,7 +2206,7 @@ class JarvisLive:
         if getattr(self, "is_sleeping", False):
             # Check if text contains wake word or despierta
             text_lower = text.lower()
-            if any(w in text_lower for w in ["despierta", "despiertate", "despiértate", "despertar", "klaida", "wake up"]):
+            if re.search(r"(?<!\w)(?:kler|cler|clér|claire)(?!\w)", text_lower):
                 self.is_sleeping = False
                 self.ui.set_state("LISTENING")
                 self.ui.write_log("SYS: 🟢 ¡Despierto por comando de texto!")
@@ -2216,7 +2216,7 @@ class JarvisLive:
                     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS | winsound.SND_ASYNC)
                 except: pass
             else:
-                self.ui.write_log("SYS: 💤 KLAIDA está en modo suspensión. Di 'KLAIDA' o escribe 'despierta' para despertarla.")
+                self.ui.write_log("SYS: 💤 KLER está en modo suspensión. Di 'KLER' o escribe 'despierta' para despertarla.")
                 return
 
         # Audio file: process with Gemini Vision (not the realtime audio session)
@@ -2283,9 +2283,9 @@ class JarvisLive:
                 return resp.text.strip()
 
             result = await loop.run_in_executor(_TOOL_EXECUTOR, _analyze)
-            self.ui.write_log(f"JARVIS: {result}")
+            self.ui.write_log(f"KLER: {result}")
 
-            # Feed result back into the realtime session so JARVIS can speak it
+            # Feed result back into the realtime session so KLER can speak it
             if self.session:
                 await self.session.send_client_content(
                     turns={"parts": [{"text": f"[RESULTADO AUDIO '{p.name}']\n{result}"}]},
@@ -2399,7 +2399,7 @@ class JarvisLive:
                     ).start()
                 return True  # phrase fired → don't also send to Gemini
         except Exception as e:
-            print(f"[JARVIS] phrase trigger error: {e}")
+            print(f"[KLER] phrase trigger error: {e}")
 
         return False
 
@@ -2526,7 +2526,7 @@ class JarvisLive:
                 )
             )
             _vad_applied = True
-            print("[JARVIS] VAD config aplicado (typed)")
+            print("[KLER] VAD config aplicado (typed)")
         except Exception:
             pass
 
@@ -2540,9 +2540,9 @@ class JarvisLive:
                         "silence_duration_ms": 500,
                     }
                 }
-                print("[JARVIS] VAD config aplicado (dict)")
+                print("[KLER] VAD config aplicado (dict)")
             except Exception:
-                print("[JARVIS] VAD config no aplicado")
+                print("[KLER] VAD config no aplicado")
 
         # ── Context compression: prevent session degradation over time ────────
         try:
@@ -2566,7 +2566,7 @@ class JarvisLive:
         name = fc.name
         args = dict(fc.args or {})
 
-        print(f"[JARVIS] 🔧 {name}  {args}")
+        print(f"[KLER] 🔧 {name}  {args}")
         self.ui.set_state("THINKING")
 
 
@@ -2593,12 +2593,12 @@ class JarvisLive:
                 )
 
         if name == "shutdown_jarvis":
-            self.ui.write_log("SYS: Apagando JARVIS...")
+            self.ui.write_log("SYS: Apagando KLER...")
             # Must quit from Qt main thread — signals are thread-safe
             self.ui._win._shutdown_sig.emit()
             return types.FunctionResponse(
                 id=fc.id, name=name,
-                response={"result": "Apagando JARVIS. ¡Hasta luego, señor!"}
+                response={"result": "Apagando KLER. ¡Hasta luego, señor!"}
             )
 
         if name == "show_hologram":
@@ -2654,7 +2654,7 @@ class JarvisLive:
                         except Exception:
                             break
                 self.set_speaking(False)
-                result = "Entrando en suspensión absoluta. Cortando transmisión a la nube hasta escuchar 'JARVIS'."
+                result = "Entrando en suspensión absoluta. Cortando transmisión a la nube hasta escuchar 'KLER'."
 
             elif name == "weather_report":
                 r = await loop.run_in_executor(_TOOL_EXECUTOR, lambda: weather_action(parameters=args, player=self.ui))
@@ -3025,7 +3025,7 @@ class JarvisLive:
         if not self.ui.muted:
             self.ui.set_state("LISTENING")
 
-        print(f"[JARVIS] 📤 {name} → {str(result)[:80]}")
+        print(f"[KLER] 📤 {name} → {str(result)[:80]}")
         return types.FunctionResponse(
             id=fc.id, name=name,
             response={"result": result}
@@ -3038,7 +3038,7 @@ class JarvisLive:
             await self.session.send_realtime_input(media=msg)
 
     async def _listen_audio(self):
-        print("[JARVIS] 🎤 Mic iniciado")
+        print("[KLER] 🎤 Mic iniciado")
         loop = asyncio.get_event_loop()
 
         def callback(indata, frames, time_info, status):
@@ -3050,7 +3050,7 @@ class JarvisLive:
                     if self.vosk_recognizer.AcceptWaveform(audio_data):
                         res = json.loads(self.vosk_recognizer.Result())
                         text = res.get("text", "")
-                        if any(w in text.lower() for w in ["klaida", "claida", "cleida", "caida", "laida", "despierta", "jarvis"]):
+                        if re.search(r"(?<!\w)(?:kler|cler|clér|claire)(?!\w)", text, re.IGNORECASE):
                             self.is_sleeping = False
                             self.last_speech_time = now
                             self.ui.set_state("LISTENING")
@@ -3108,7 +3108,7 @@ class JarvisLive:
                 if now - getattr(self, "last_speech_time", now) > 6.0:
                     self.is_sleeping = True
                     self.ui.set_state("MUTED")
-                    self.ui.write_log("SYS: 💤 Auto-suspensión por inactividad. Di 'KLAIDA' para despertar.")
+                    self.ui.write_log("SYS: 💤 Auto-suspensión por inactividad. Di 'KLER' para despertar.")
                     return
 
                 # Si estamos dentro del tiempo de resaca (hangover) de 0.8s
@@ -3128,7 +3128,7 @@ class JarvisLive:
                     # Descartar paquete en silencio para evitar alucinaciones en la nube
                     pass
             elif jarvis_speaking:
-                # When JARVIS is speaking, also update level (from playback perspective)
+                # When KLER is speaking, also update level (from playback perspective)
                 try:
                     rms = float(np.sqrt(np.mean(indata.astype(np.float32) ** 2))) / 32768.0
                     self.ui.set_audio_level(min(1.0, rms * 15))
@@ -3143,15 +3143,15 @@ class JarvisLive:
                 blocksize=CHUNK_SIZE,
                 callback=callback,
             ):
-                print("[JARVIS] 🎤 Mic stream open")
+                print("[KLER] 🎤 Mic stream open")
                 while True:
                     await asyncio.sleep(0.01)  # 10ms — máxima responsividad del mic
         except Exception as e:
-            print(f"[JARVIS] ❌ Mic: {e}")
+            print(f"[KLER] ❌ Mic: {e}")
             raise
 
     async def _receive_audio(self):
-        print("[JARVIS] 👂 Recv iniciado")
+        print("[KLER] 👂 Recv iniciado")
         out_buf, in_buf = [], []
         _first_chunk   = True
         _last_tool     = None   # track which tool was executing when error hit
@@ -3200,7 +3200,7 @@ class JarvisLive:
                         _first_chunk = True
                         fcs = response.tool_call.function_calls
                         for fc in fcs:
-                            print(f"[JARVIS] 📞 {fc.name}")
+                            print(f"[KLER] 📞 {fc.name}")
                             _last_tool = fc.name
                         async def _handle_tools(fcs_to_run):
                             nonlocal _last_tool
@@ -3217,7 +3217,7 @@ class JarvisLive:
                                     )
                                     _last_tool = None  # only clear AFTER successful send
                             except Exception as tool_err:
-                                print(f"[JARVIS] ❌ send_tool_response failed: {tool_err}")
+                                print(f"[KLER] ❌ send_tool_response failed: {tool_err}")
                                 
                         # Ejecutar herramientas en background para no bloquear el receive del websocket
                         asyncio.create_task(_handle_tools(fcs))
@@ -3227,15 +3227,15 @@ class JarvisLive:
             # Detect 1011 (internal server error) regardless of exception type
             if code == 1011 or "1011" in msg or "Internal error" in msg:
                 tool_info = f" durante '{_last_tool}'" if _last_tool else ""
-                print(f"[JARVIS] ⚡ API 1011{tool_info} — reconectando...")
+                print(f"[KLER] ⚡ API 1011{tool_info} — reconectando...")
                 self._api_1011_tool = _last_tool
             else:
-                print(f"[JARVIS] ❌ Recv: {e}")
+                print(f"[KLER] ❌ Recv: {e}")
                 traceback.print_exc()
             raise
 
     async def _play_audio(self):
-        print("[JARVIS] 🔊 Play iniciado")
+        print("[KLER] 🔊 Play iniciado")
 
         stream = sd.RawOutputStream(
             samplerate=RECEIVE_SAMPLE_RATE,
@@ -3287,7 +3287,7 @@ class JarvisLive:
                         await asyncio.to_thread(stream.write, buffered)
                     _jitter_buf.clear()
         except Exception as e:
-            print(f"[JARVIS] ❌ Play: {e}")
+            print(f"[KLER] ❌ Play: {e}")
             raise
         finally:
             self.set_speaking(False)
@@ -3304,7 +3304,7 @@ class JarvisLive:
                     api_key=_get_api_key(),
                     http_options={"api_version": "v1beta"}
                 )
-                print("[JARVIS] 🔌 Conectando...")
+                print("[KLER] 🔌 Conectando...")
                 self.ui.set_state("THINKING")
                 config = self._build_config()
 
@@ -3319,9 +3319,9 @@ class JarvisLive:
                     self._turn_done_event = asyncio.Event()
                     self._reconnect_event = asyncio.Event()
 
-                    print("[JARVIS] ✅ Conectado.")
+                    print("[KLER] ✅ Conectado.")
                     self.ui.set_state("LISTENING")
-                    self.ui.write_log("SYS: JARVIS en línea.")
+                    self.ui.write_log("SYS: KLER en línea.")
                     reconnect_delay   = 1.0   # reset backoff on successful connection
                     consecutive_fails = 0
                     self._api_1011_tool = None   # clear 1011 tool tracker
@@ -3336,7 +3336,7 @@ class JarvisLive:
                                 speaking_fn=lambda: self._is_speaking,
                             )
                         except Exception as _vge:
-                            print(f"[JARVIS] VisionGuardian init error: {_vge}")
+                            print(f"[KLER] VisionGuardian init error: {_vge}")
                             
                         # Start Notification Watcher
                         try:
@@ -3353,7 +3353,7 @@ class JarvisLive:
                             self._notif_watcher = NotificationWatcher(_on_notif)
                             tg.create_task(self._notif_watcher.start())
                         except Exception as ne:
-                            print(f"[JARVIS] NotifWatcher error: {ne}")
+                            print(f"[KLER] NotifWatcher error: {ne}")
                         # Auto saludo dinámico en cada inicio
                         async def _auto_greet():
                             await asyncio.sleep(1.5)  # let session settle
@@ -3392,15 +3392,15 @@ class JarvisLive:
                         # Timeout de WebSocket al conectar — error de red transitorio.
                         # NO incrementar consecutive_fails: sólo reintento rápido.
                         is_handshake_timeout = True
-                        print(f"[JARVIS] ⏱️ Timeout al conectar — reintentando en 1s...")
+                        print(f"[KLER] ⏱️ Timeout al conectar — reintentando en 1s...")
                     elif "1011" in msg or "Internal error" in msg:
                         tool_hint = self._api_1011_tool or ""
-                        print(f"[JARVIS] ⚡ API 1011{tool_hint and ' durante '+tool_hint} — reconectando...")
+                        print(f"[KLER] ⚡ API 1011{tool_hint and ' durante '+tool_hint} — reconectando...")
                         consecutive_fails += 1
                         if consecutive_fails >= 4:
                             self.ui.write_log(
                                 "SYS: ⚠️ Error 1011 repetido. Esperando para no saturar la API...\n"
-                                "SYS: Si persiste más de 2 min, reiniciá JARVIS."
+                                "SYS: Si persiste más de 2 min, reiniciá KLER."
                             )
                         elif tool_hint:
                             self.ui.write_log(f"SYS: Error de servidor al ejecutar '{tool_hint}'. Reconectando...")
@@ -3408,21 +3408,21 @@ class JarvisLive:
                             self.ui.write_log("SYS: Error de servidor 1011. Reconectando...")
                     elif "1008" in msg or "policy violation" in msg.lower() or "not found for API version" in msg:
                         # Model not available / wrong API version — log clearly, retry with same model
-                        print(f"[JARVIS] ⚠️ Modelo no disponible en esta versión de API: {msg[:120]}")
+                        print(f"[KLER] ⚠️ Modelo no disponible en esta versión de API: {msg[:120]}")
                         self.ui.write_log("SYS: ⚠️ Modelo no disponible. Reintentando...")
                         consecutive_fails += 1
                     elif "1000" in msg or "going away" in msg.lower():
                         # Cierre normal de la sesión (expiró ~15 min) — silencioso
-                        print(f"[JARVIS] 🔄 Sesión expirada — reconectando...")
+                        print(f"[KLER] 🔄 Sesión expirada — reconectando...")
                         consecutive_fails = 0   # reset: no es un fallo
                     elif "429" in msg or "quota" in msg.lower() or "exhausted" in msg.lower() or "too many requests" in msg.lower():
-                        print(f"[JARVIS] ⚠️ Límite de cuota API (429). Rotando llave...")
+                        print(f"[KLER] ⚠️ Límite de cuota API (429). Rotando llave...")
                         rotate_api_key()
                         self.ui.write_log(f"SYS: ⚠️ Límite de cuota alcanzado. Cambiando a llave de respaldo.")
                         is_config_reconnect = True
                         consecutive_fails = 0
                     else:
-                        print(f"[JARVIS] ⚠️ {exc}")
+                        print(f"[KLER] ⚠️ {exc}")
                         traceback.print_exc()
                         consecutive_fails += 1
 
@@ -3453,22 +3453,22 @@ class JarvisLive:
             import random as _rnd
             jitter = _rnd.uniform(0, reconnect_delay * 0.25)
             total  = reconnect_delay + jitter
-            print(f"[JARVIS] 🔄 Reconectando en {total:.1f}s...")
+            print(f"[KLER] 🔄 Reconectando en {total:.1f}s...")
             await asyncio.sleep(total)
 
 def main():
     # ── Single Instance Lock ──────────────────────────────────────────────────
     import ctypes
-    _single_instance_mutex = ctypes.windll.kernel32.CreateMutexW(None, False, "JARVIS_AI_SINGLE_INSTANCE_MUTEX")
+    _single_instance_mutex = ctypes.windll.kernel32.CreateMutexW(None, False, "KLER_AI_SINGLE_INSTANCE_MUTEX")
     if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
-        print("[JARVIS] Ya hay una instancia en ejecución. Cerrando.")
+        print("[KLER] Ya hay una instancia en ejecución. Cerrando.")
         try:
-            hwnd = ctypes.windll.user32.FindWindowW(None, "JARVIS-AI-HUD")
+            hwnd = ctypes.windll.user32.FindWindowW(None, "KLER-AI-HUD")
             if hwnd:
                 ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
                 ctypes.windll.user32.SetForegroundWindow(hwnd)
         except Exception as e:
-            print(f"[JARVIS] Error al restaurar la ventana activa: {e}")
+            print(f"[KLER] Error al restaurar la ventana activa: {e}")
         sys.exit(0)
 
     # ── Admin validation ──────────────────────────────────────────────────────
@@ -3477,9 +3477,9 @@ def main():
     except Exception:
         is_admin = False
     if not is_admin:
-        print("[JARVIS] ⚠️ ADVERTENCIA: No se está ejecutando con privilegios de Administrador.")
-        print("[JARVIS] ⚠️ Algunas funciones de control del PC o de terminal podrían fallar.")
-        print("[JARVIS] ⚠️ Se recomienda iniciar JARVIS mediante 'Iniciar JARVIS Beta.vbs'.")
+        print("[KLER] ⚠️ ADVERTENCIA: No se está ejecutando con privilegios de Administrador.")
+        print("[KLER] ⚠️ Algunas funciones de control del PC o de terminal podrían fallar.")
+        print("[KLER] ⚠️ Se recomienda iniciar KLER mediante 'Iniciar Kler Beta.vbs'.")
 
     # ── License check ─────────────────────────────────────────────────────────
     # ──────────────────────────────────────────────────────────────────────────
@@ -3514,12 +3514,12 @@ def main():
         app = QApplication.instance() or QApplication(sys.argv)
         
         dialog = QDialog()
-        dialog.setWindowTitle("Configuración Inicial de JARVIS")
+        dialog.setWindowTitle("Configuración Inicial de KLER")
         dialog.resize(450, 250)
         dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         layout = QVBoxLayout(dialog)
         
-        lbl_info = QLabel("¡Bienvenido a JARVIS!\n\nPor favor, ingresa tus API keys o selecciona Ollama en la configuración.\nEstas se guardarán localmente y de forma segura.")
+        lbl_info = QLabel("¡Bienvenido a KLER!\n\nPor favor, ingresa tus API keys o selecciona Ollama en la configuración.\nEstas se guardarán localmente y de forma segura.")
         lbl_info.setStyleSheet("font-size: 14px; font-weight: bold; margin-bottom: 10px;")
         layout.addWidget(lbl_info)
         
@@ -3580,7 +3580,7 @@ def main():
         
         name, ok = QInputDialog.getText(
             None, 
-            "Configuración Inicial - JARVIS", 
+            "Configuración Inicial - KLER",
             "¿Cómo desea que lo llame, señor?", 
             text="Señor"
         )
@@ -3619,12 +3619,12 @@ def main():
                     except:
                         label.hide()
 
-            # 2. Add keyboard shortcut & Global Hotkey (INS / Insert key) to wake up JARVIS
+            # 2. Add keyboard shortcut & Global Hotkey (INS / Insert key) to wake up KLER
             from PyQt6.QtGui import QKeySequence, QShortcut
             from PyQt6.QtCore import Qt, QTimer
 
             def on_shortcut_triggered():
-                # Wake up / unmute JARVIS
+                # Wake up / unmute KLER
                 if hasattr(ui, "_win"):
                     # Si está muteado, desmutearlo para que escuche
                     if getattr(ui, "muted", False):
@@ -3636,7 +3636,7 @@ def main():
                         if hasattr(ui._win, "showNormal"):
                             ui._win.showNormal()
                             ui._win.activateWindow()
-                            ui.write_log("SYS: 🔔 JARVIS en foco vía atajo INS.")
+                            ui.write_log("SYS: 🔔 KLER en foco vía atajo INS.")
                         
                         # Cambiar estado visual a escuchando
                         try:

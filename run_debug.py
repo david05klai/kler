@@ -27,7 +27,7 @@ def get_watched_files():
 def main():
     print("============================================================")
     print("\033[1;32m   [RELOADER] Monitor de Cambios Activo (Hot Reload)   \033[0m")
-    print("   Cualquier cambio en el código reiniciará JARVIS automáticamente.")
+    print("   Cualquier cambio en el código reiniciará KLER automáticamente.")
     print("============================================================")
     
     # We run main.py inside the virtual environment python interpreter
@@ -52,9 +52,9 @@ def main():
             if child.poll() is not None:
                 exit_code = child.returncode
                 if exit_code == 0:
-                    print("\033[1;33m[RELOADER] JARVIS cerró normalmente.\033[0m")
+                    print("\033[1;33m[RELOADER] KLER cerró normalmente.\033[0m")
                 else:
-                    print(f"\033[1;31m[RELOADER] JARVIS finalizó con código de error {exit_code}. Esperando cambios para reiniciar...\033[0m")
+                    print(f"\033[1;31m[RELOADER] KLER finalizó con código de error {exit_code}. Esperando cambios para reiniciar...\033[0m")
                 
                 # Keep looping to watch for edits to restart it
                 while child.poll() is not None:

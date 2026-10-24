@@ -11,7 +11,7 @@
   "ollama_model": "gemma2:2b",
   "performance_quality": 47,
   "jarvis_voice": "Charon",
-  "jarvis_theme": "gold",
+  "jarvis_theme": "cyan",
   "gpu_acceleration": true,
   "mic_device": 1,
   "mic_sensitivity": 0.0072,

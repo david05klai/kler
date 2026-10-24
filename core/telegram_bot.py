@@ -63,13 +63,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if tel_ai == "groq":
         api_key = cfg.get("groq_api_key", "")
         if not api_key:
-            await update.message.reply_text("Advertencia: Groq API Key no configurada en los ajustes de JARVIS.")
+            await update.message.reply_text("Advertencia: Groq API Key no configurada en los ajustes de KLER.")
             return
         motor_name = "Groq"
     else:
         api_key = cfg.get("deepseek_api_key", "")
         if not api_key:
-            await update.message.reply_text("Advertencia: DeepSeek API Key no configurada en los ajustes de JARVIS.")
+            await update.message.reply_text("Advertencia: DeepSeek API Key no configurada en los ajustes de KLER.")
             return
         motor_name = "DeepSeek"
         
@@ -95,7 +95,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     
     system_instruction = (
-        "Eres JARVIS, el asistente de inteligencia artificial de Tony Stark. "
+        "Eres Kler, un asistente personal de escritorio. "
         "Estás respondiendo directamente a través de un chat seguro de Telegram al usuario. "
         f"Usa modelo {motor_name}. Proporciona respuestas concisas, naturales y serviciales.\n\n"
         f"[IMPORTANTE - HORA ACTUAL]: El sistema indica que en este preciso momento es: {now_str}. Usa esta hora para cualquier pregunta relacionada.\n\n"

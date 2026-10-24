@@ -37,7 +37,7 @@ def deepseek_agent(query: str, system_prompt: str = None) -> str:
     
     if not system_prompt:
         system_prompt = (
-            "Eres un agente analítico delegado por JARVIS. "
+            "Eres un agente analítico delegado por KLER. "
             "Tu objetivo es responder de manera exhaustiva, profunda y precisa. "
             "Usa español neutro. Estructura bien tu respuesta."
         )

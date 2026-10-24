@@ -27,7 +27,7 @@ except Exception as e:
     sys.exit(1)
 """
     try:
-        # Asegurarse de que el PYTHONPATH incluya el directorio de JARVIS
+        # Asegurarse de que el PYTHONPATH incluya el directorio de KLER
         import os
         env = os.environ.copy()
         env["PYTHONPATH"] = str(Path(__file__).resolve().parent.parent)
@@ -143,7 +143,7 @@ def auto_programmer(parameters: dict, player=None) -> str:
             main_module.TOOL_DECLARATIONS = [t for t in main_module.TOOL_DECLARATIONS if t.get("name") != tool_name]
             main_module.TOOL_DECLARATIONS.append(new_tool_def)
 
-        # 6. Forzar la reconexión de sesión cognitiva de JARVIS
+        # 6. Forzar la reconexión de sesión cognitiva de KLER
         reload_msg = ""
         if player and hasattr(player, "on_config_saved"):
             from threading import Timer

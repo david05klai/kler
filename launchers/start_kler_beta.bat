@@ -17,8 +17,8 @@ if exist "%PY%" (
     if exist "%MAINC%" ( start "" /B "%PY%" "%MAINC%" & goto :done )
 )
 
-echo JARVIS Beta: no se encontro Python o main.py.
-echo Ejecuta primero "Instalar_JARVIS.bat" para instalar el entorno.
+echo KLER Beta: no se encontro Python o main.py.
+echo Ejecuta primero "Instalar_Kler.bat" para instalar el entorno.
 pause
 :done
 popd

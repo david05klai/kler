@@ -1,4 +1,4 @@
-"""ui.py — 100% Custom Gold-Themed Dynamic Bento PyQt6 User Interface for JARVIS.
+"""ui.py — 100% Custom Gold-Themed Dynamic Bento PyQt6 User Interface for KLER.
 
 Fully optimized HUD layouts:
 - Background WebGL reactive Particle Orb covering the screen.
@@ -64,19 +64,19 @@ THEMES = {
 }
 
 # Theme Tokens
-C_PRI = "#f59e0b"
-C_PRI_DIM = "#78350f"
-C_BG = "#0f0a02"
-C_PANEL = "rgba(35, 28, 10, 0.70)"
-C_BORDER = "rgba(245, 158, 11, 0.45)"
-C_TEXT = "#fde68a"
+C_PRI = "#00d4ff"
+C_PRI_DIM = "#005f77"
+C_BG = "#050c14"
+C_PANEL = "rgba(10, 22, 32, 0.7)"
+C_BORDER = "rgba(0, 212, 255, 0.45)"
+C_TEXT = "#7aeeff"
 
 GREEN = "#00ff88"
 RED = "#ff3b30"
 
 def apply_theme_tokens(theme_name: str):
     global C_PRI, C_PRI_DIM, C_BG, C_PANEL, C_BORDER, C_TEXT
-    t = THEMES.get(theme_name.lower(), THEMES["gold"])
+    t = THEMES.get(theme_name.lower(), THEMES["cyan"])
     C_PRI = t["PRI"]
     C_PRI_DIM = t["PRI_DIM"]
     C_BG = t["BG"]
@@ -86,10 +86,10 @@ def apply_theme_tokens(theme_name: str):
 
 try:
     from memory.config_manager import load_api_keys
-    _theme_name = load_api_keys().get("jarvis_theme", "gold")
+    _theme_name = load_api_keys().get("jarvis_theme", "cyan")
     apply_theme_tokens(_theme_name)
 except Exception:
-    apply_theme_tokens("gold")
+    apply_theme_tokens("cyan")
 
 
 class WebBridge(QObject):
@@ -157,7 +157,7 @@ class CustomParticleOrb(QWidget):
             bg_label = QLabel(self)
             bg_label.setStyleSheet(f"background-color: {C_BG};")
             layout.addWidget(bg_label)
-            print("[JARVIS] Low-resource mode active: Particle Orb Chromium process disabled.")
+            print("[KLER] Low-resource mode active: Particle Orb Chromium process disabled.")
             
         self.setLayout(layout)
         
@@ -854,7 +854,7 @@ class FilesPanel(QWidget):
 class DeviceSettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("JARVIS Settings Configuration Control")
+        self.setWindowTitle("KLER Settings Configuration Control")
         self.resize(650, 500)
         self.update_style()
         
@@ -1062,13 +1062,13 @@ class DeviceSettingsDialog(QDialog):
         self.spotify_id_lbl = QLabel("Spotify Client ID:")
         lay_spot.addWidget(self.spotify_id_lbl)
         self.inp_spotify_id = QLineEdit()
-        self.inp_spotify_id.setPlaceholderText("Dejar en blanco para usar credenciales de JARVIS")
+        self.inp_spotify_id.setPlaceholderText("Dejar en blanco para usar credenciales de KLER")
         lay_spot.addWidget(self.inp_spotify_id)
         
         self.spotify_secret_lbl = QLabel("Spotify Client Secret:")
         lay_spot.addWidget(self.spotify_secret_lbl)
         self.inp_spotify_secret = QLineEdit()
-        self.inp_spotify_secret.setPlaceholderText("Dejar en blanco para usar credenciales de JARVIS")
+        self.inp_spotify_secret.setPlaceholderText("Dejar en blanco para usar credenciales de KLER")
         self.inp_spotify_secret.setEchoMode(QLineEdit.EchoMode.Password)
         lay_spot.addWidget(self.inp_spotify_secret)
         
@@ -1194,7 +1194,7 @@ class DeviceSettingsDialog(QDialog):
                     self.cmb_voice.setCurrentIndex(idx)
                     break
                     
-            theme = cfg.get("jarvis_theme", "gold")
+            theme = cfg.get("jarvis_theme", "cyan")
             idx = self.cmb_theme.findData(theme)
             if idx >= 0:
                 self.cmb_theme.setCurrentIndex(idx)
@@ -1301,7 +1301,7 @@ class DeviceSettingsDialog(QDialog):
                         f"if (window.updatePerformance) window.updatePerformance({self.sld_performance.value()});"
                     )
                 
-            QMessageBox.information(self, "Success", "JARVIS Configurations saved, sir.")
+            QMessageBox.information(self, "Success", "KLER Configurations saved, sir.")
             self.accept()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save settings: {e}")
@@ -1449,7 +1449,7 @@ class DeviceSettingsDialog(QDialog):
                                 "<head>"
                                 "  <meta charset='utf-8'>"
                                 "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                                "  <title>JARVIS - Conectado</title>"
+                                "  <title>KLER - Conectado</title>"
                                 "  <link href='https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap' rel='stylesheet'>"
                                 "  <style>"
                                 "    body { background: #060400; color: #fde68a; font-family: 'Outfit', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }"
@@ -1469,7 +1469,7 @@ class DeviceSettingsDialog(QDialog):
                                 "      </svg>"
                                 "    </div>"
                                 "    <h1>Spotify Conectado</h1>"
-                                "    <p>La vinculación con JARVIS se ha completado con éxito.<br>Ya puedes cerrar esta pestaña y volver a la aplicación.</p>"
+                                "    <p>La vinculación con KLER se ha completado con éxito.<br>Ya puedes cerrar esta pestaña y volver a la aplicación.</p>"
                                 "  </div>"
                                 "</body>"
                                 "</html>"
@@ -1594,7 +1594,7 @@ class MainWindow(QMainWindow):
         
         self.resize(1050, 760)
         self.setMinimumSize(1000, 750)
-        self.setWindowTitle("JARVIS-AI-HUD")
+        self.setWindowTitle("KLER-AI-HUD")
         
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -1603,7 +1603,7 @@ class MainWindow(QMainWindow):
         self.central_widget.setObjectName("centralWidget")
         self.setCentralWidget(self.central_widget)
         
-        icon_path = Path(__file__).parent / "assets" / "jarvis_icono.ico"
+        icon_path = Path(__file__).parent / "assets" / "kler.ico"
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
             
@@ -1859,7 +1859,7 @@ class MainWindow(QMainWindow):
                 print("[UI] Camera Preview Window restored.")
 
     def stop_gesture_thread(self):
-        """Cleanly stop the background gesture tracking thread on JARVIS exit."""
+        """Cleanly stop the background gesture tracking thread on KLER exit."""
         if hasattr(self, '_gesture_thread') and self._gesture_thread is not None:
             self._gesture_thread.stop()
             self._gesture_thread = None
@@ -1868,7 +1868,7 @@ class MainWindow(QMainWindow):
     def _setup_tray_icon(self):
         from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
         self.tray_icon = QSystemTrayIcon(self)
-        icon_path = Path(__file__).parent / "assets" / "jarvis_icono.ico"
+        icon_path = Path(__file__).parent / "assets" / "kler.ico"
         if icon_path.exists():
             self.tray_icon.setIcon(QIcon(str(icon_path)))
         else:
@@ -1877,7 +1877,7 @@ class MainWindow(QMainWindow):
             
         tray_menu = QMenu(self)
         
-        show_action = tray_menu.addAction("Mostrar JARVIS")
+        show_action = tray_menu.addAction("Mostrar KLER")
         show_action.triggered.connect(self.show_and_activate)
         
         mute_action = tray_menu.addAction("Silenciar/Escuchar")
@@ -1930,7 +1930,7 @@ class MainWindow(QMainWindow):
             if hasattr(self, "tray_icon") and self.tray_icon.isVisible():
                 from PyQt6.QtWidgets import QSystemTrayIcon
                 self.tray_icon.showMessage(
-                    "JARVIS AI",
+                    "KLER AI",
                     "Sigo activo en segundo plano. Presiona Insert para hablar o haz doble clic aquí para mostrarme.",
                     QSystemTrayIcon.MessageIcon.Information,
                     3000
@@ -2001,7 +2001,7 @@ class JarvisUI:
         self._win._clear_text_sig.emit()
         
     def stream_jarvis_chunk(self, chunk: str):
-        text = chunk.replace("JARVIS:", "").replace("KLAIDA:", "").strip()
+        text = chunk.replace("KLER:", "").replace("KLER:", "").strip()
         if text:
             if self.jarvis_response_buffer:
                 self.jarvis_response_buffer += " " + text
@@ -2017,11 +2017,11 @@ class JarvisUI:
             if not appdata:
                 return
             startup_dir = os.path.join(appdata, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
-            shortcut_path = os.path.join(startup_dir, 'JARVIS AI.lnk')
+            shortcut_path = os.path.join(startup_dir, 'KLER AI.lnk')
             
             current_dir = os.path.abspath(os.path.dirname(__file__))
-            target_vbs = os.path.join(current_dir, "Iniciar JARVIS Beta.vbs")
-            icon_path = os.path.join(current_dir, "assets", "jarvis_icono.ico")
+            target_vbs = os.path.join(current_dir, "Iniciar Kler Beta.vbs")
+            icon_path = os.path.join(current_dir, "assets", "kler.ico")
             
             if not os.path.exists(target_vbs):
                 return
@@ -2031,7 +2031,7 @@ class JarvisUI:
                 f"$s.TargetPath='{target_vbs}';"
                 f"$s.WorkingDirectory='{current_dir}';"
                 f"$s.IconLocation='{icon_path}';"
-                f"$s.Description='Lanzador Automatico de JARVIS AI (Admin)';"
+                f"$s.Description='Lanzador Automatico de KLER AI (Admin)';"
                 f"$s.Save()"
             )
             subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -2062,7 +2062,7 @@ class ProtocolDialog(QDialog):
         layout.addWidget(self.txt_name)
         
         self.txt_desc = QTextEdit()
-        self.txt_desc.setPlaceholderText("Instrucciones para JARVIS (ej. 'Abre Steam y Spotify al 30%')")
+        self.txt_desc.setPlaceholderText("Instrucciones para KLER (ej. 'Abre Steam y Spotify al 30%')")
         self.txt_desc.setStyleSheet("background-color: #1a1405; border: 1px solid #f59e0b; padding: 5px;")
         layout.addWidget(self.txt_desc)
         
@@ -2127,7 +2127,7 @@ class ProtocolDialog(QDialog):
                 pass
 
 class HolographicWidget(QWidget):
-    def __init__(self, title="JARVIS Intelligence", parent=None):
+    def __init__(self, title="KLER Intelligence", parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)

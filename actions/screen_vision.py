@@ -74,7 +74,7 @@ def screen_vision(parameters: dict, player=None) -> str:
     except Exception as e:
         return f"Error al capturar la pantalla: {e}"
         
-    # Verificar si el usuario solicita mostrar o ver lo que JARVIS está viendo
+    # Verificar si el usuario solicita mostrar o ver lo que KLER está viendo
     show_words = ["mostrar", "muestra", "ver", "show", "mostrame", "visu", "pantalla"]
     should_show = (action == "show") or any(w in query.lower() for w in show_words)
     
@@ -190,7 +190,7 @@ def screen_vision(parameters: dict, player=None) -> str:
             headers = {
                 "Authorization": f"Bearer {openrouter_key}",
                 "HTTP-Referer": "https://github.com/jarvis-beta",
-                "X-Title": "JARVIS AI Assistant",
+                "X-Title": "KLER AI Assistant",
                 "Content-Type": "application/json"
             }
             
@@ -263,7 +263,7 @@ def screen_vision(parameters: dict, player=None) -> str:
             if player:
                 player.write_log("[Visión Fallback] Intentando recuperar con OpenRouter...")
             url = "https://openrouter.ai/api/v1/chat/completions"
-            headers = {"Authorization": f"Bearer {openrouter_key}", "HTTP-Referer": "https://github.com/jarvis-beta", "X-Title": "JARVIS AI Assistant", "Content-Type": "application/json"}
+            headers = {"Authorization": f"Bearer {openrouter_key}", "HTTP-Referer": "https://github.com/jarvis-beta", "X-Title": "KLER AI Assistant", "Content-Type": "application/json"}
             payload = {"model": "google/gemini-2.5-flash", "max_tokens": 1500, "messages": [{"role": "user", "content": [{"type": "text", "text": f"Esta es una captura de mi pantalla. {query}"}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64_image}"}}]}]}
             req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
             with urllib.request.urlopen(req, timeout=45) as response:

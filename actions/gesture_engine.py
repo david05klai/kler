@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-gesture_engine.py — High-fidelity webcam hand tracking and mouse gesture controller for JARVIS-IA.
+gesture_engine.py — High-fidelity webcam hand tracking and mouse gesture controller for KLER-IA.
 Fully optimized using the modern MediaPipe Tasks HandLandmarker API for bulletproof Windows stability.
 
 Gesture System:
@@ -165,7 +165,7 @@ class GestureTrackingThread(QThread):
             # HUD border & title
             cv2.rectangle(frame, (10, 10), (w - 10, h - 10), self.theme_bgr, 1)
             cv2.putText(
-                frame, "JARVIS GESTURE PILOT", (20, 35),
+                frame, "KLER GESTURE PILOT", (20, 35),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, self.theme_bgr, 1, cv2.LINE_AA,
             )
 

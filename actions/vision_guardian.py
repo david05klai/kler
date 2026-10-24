@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-vision_guardian.py — Premium active screen monitoring and contextual suggestion agent for JARVIS.
+vision_guardian.py — Premium active screen monitoring and contextual suggestion agent for KLER.
 """
 import os
 import json
@@ -82,7 +82,7 @@ def _perform_vision_analysis() -> str:
         return "NORMAL"
 
     query = (
-        "Eres el Guardián de Visión de JARVIS. Analiza esta captura de pantalla del usuario. "
+        "Eres el Guardián de Visión de KLER. Analiza esta captura de pantalla del usuario. "
         "Si encuentras un error crítico en una terminal, un aviso importante, un mensaje urgente de chat "
         "o si el usuario está claramente atascado o necesita ayuda contextual inmediata en lo que está haciendo, "
         "genera una sugerencia o aviso súper conciso, directo e inteligente en español de MÁXIMO 12 palabras. "
@@ -158,7 +158,7 @@ def _perform_vision_analysis() -> str:
         headers = {
             "Authorization": f"Bearer {openrouter_key}",
             "HTTP-Referer": "https://github.com/jarvis-beta",
-            "X-Title": "JARVIS Proactive Vision Guardian",
+            "X-Title": "KLER Proactive Vision Guardian",
             "Content-Type": "application/json"
         }
 
@@ -213,7 +213,7 @@ def _guardian_loop():
                 time.sleep(1.0)
 
             if enabled and _inject_fn and _speaking_fn:
-                # Avoid injecting text if JARVIS is already talking
+                # Avoid injecting text if KLER is already talking
                 is_speaking = False
                 try:
                     is_speaking = _speaking_fn()
@@ -254,7 +254,7 @@ def start(inject_fn, speaking_fn) -> None:
 
 def vision_guardian(parameters: dict, player=None) -> str:
     """
-    JARVIS tool function. Controls activation and settings of the screen monitoring system.
+    KLER tool function. Controls activation and settings of the screen monitoring system.
     """
     action = parameters.get("action", "status").lower().strip()
     seconds = parameters.get("seconds", None)

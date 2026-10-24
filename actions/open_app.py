@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-open_app.py — Intelligent heuristic application finder and launcher for JARVIS.
+open_app.py — Intelligent heuristic application finder and launcher for KLER.
 """
 import os
 import subprocess

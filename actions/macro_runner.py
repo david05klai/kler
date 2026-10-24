@@ -7,7 +7,7 @@ from pathlib import Path
 def macro_runner(parameters: dict, player=None) -> str:
     """
     Executes a sequence of UI actions based on a dynamic plan.
-    This allows JARVIS to 'learn' and execute multi-step macros like opening an app,
+    This allows KLER to 'learn' and execute multi-step macros like opening an app,
     searching for something, and clicking.
     """
     action = parameters.get("action", "")

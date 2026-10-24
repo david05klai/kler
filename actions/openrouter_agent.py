@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-openrouter_agent.py — Unified Local AI (Ollama) and Cloud API (OpenRouter) completion agent for JARVIS.
+openrouter_agent.py — Unified Local AI (Ollama) and Cloud API (OpenRouter) completion agent for KLER.
 """
 import json
 import urllib.request
@@ -42,7 +42,7 @@ def openrouter_agent(query: str, model: str = "google/gemini-2.5-flash") -> str:
         payload = {
             "model": ollama_model,
             "messages": [
-                {"role": "system", "content": "Eres JARVIS, un asistente inteligente local. Responde de forma clara, directa, muy concisa y al grano en español." + time_context},
+                {"role": "system", "content": "Eres KLER, un asistente inteligente local. Responde de forma clara, directa, muy concisa y al grano en español." + time_context},
                 {"role": "user", "content": query}
             ],
             "options": {
@@ -86,7 +86,7 @@ def openrouter_agent(query: str, model: str = "google/gemini-2.5-flash") -> str:
         headers = {
             "Authorization": f"Bearer {api_key}",
             "HTTP-Referer": "https://github.com/jarvis-beta",
-            "X-Title": "JARVIS AI Assistant",
+            "X-Title": "KLER AI Assistant",
             "Content-Type": "application/json"
         }
         
@@ -97,7 +97,7 @@ def openrouter_agent(query: str, model: str = "google/gemini-2.5-flash") -> str:
             "model": active_model,
             "max_tokens": 1500,
             "messages": [
-                {"role": "system", "content": "Eres un Agente Especialista de JARVIS. Responde de forma clara, directa y muy concisa en español." + time_context},
+                {"role": "system", "content": "Eres un Agente Especialista de KLER. Responde de forma clara, directa y muy concisa en español." + time_context},
                 {"role": "user", "content": query}
             ]
         }

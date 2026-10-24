@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS Neural Core</title>
+    <title>KLER Neural Core</title>
     <!-- Material Symbols & Sora Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --primary-fixed: #f59e0b;
-            --primary-fixed-dim: #78350f;
-            --primary-glow: rgba(245, 158, 11, 0.3);
-            --primary-ring-1-bg: rgba(245, 158, 11, 0.2);
-            --primary-ring-2-bg: rgba(245, 158, 11, 0.15);
+            --primary-fixed: #00d4ff;
+            --primary-fixed-dim: #005f77;
+            --primary-glow: rgba(0, 212, 255, 0.3);
+            --primary-ring-1-bg: rgba(0, 212, 255, 0.2);
+            --primary-ring-2-bg: rgba(0, 212, 255, 0.15);
             --energy-level: 1.0;
             --glow-intensity: 0.6;
         }
@@ -63,6 +63,8 @@
             justify-content: center;
         }
 
+        .kler-brand { position: absolute; top: 7%; left: 50%; transform: translateX(-50%); z-index: 20; color: #e8fbff; font: 700 25px Sora, sans-serif; letter-spacing: .42em; text-shadow: 0 0 22px var(--primary-glow); }
+        .kler-brand small { display: block; margin-top: 7px; font: 500 9px JetBrains Mono, monospace; letter-spacing: .32em; color: var(--primary-fixed); text-align: center; }
         #orb-wrapper {
             position: absolute;
             top: 0;
@@ -95,7 +97,7 @@
             width: 75%;
             height: 75%;
             transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.22) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
             mix-blend-mode: screen;
@@ -247,6 +249,7 @@
 </head>
 <body>
     <div id="neural-core-container">
+        <div class="kler-brand">KLER<small>DESKTOP INTELLIGENCE</small></div>
         <!-- Orb Wrapper for centering the sphere in the upper half of the window -->
         <div id="orb-wrapper">
             <!-- Central Neural Sphere -->
@@ -331,8 +334,8 @@
         let currentState = "LISTENING"; // LISTENING, THINKING, SPEAKING, MUTED
         let currentVolume = 0.0;
         let themeColors = {
-            PRI: '#f59e0b',
-            PRI_DIM: '#78350f',
+            PRI: '#00d4ff',
+            PRI_DIM: '#005f77',
             TEXT: '#fde68a',
             BG: '#0c0a00'
         };

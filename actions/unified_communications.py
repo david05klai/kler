@@ -74,7 +74,7 @@ def unified_communications(parameters: dict, player=None) -> str:
             
         payload = {
             "content": message,
-            "username": "JARVIS AI Assistant"
+            "username": "KLER AI Assistant"
         }
         
         try:
@@ -91,7 +91,7 @@ def unified_communications(parameters: dict, player=None) -> str:
 
     elif platform == "gmail":
         # Envío de correo usando mailto o API ligera
-        subject = parameters.get("subject", "Mensaje de JARVIS AI")
+        subject = parameters.get("subject", "Mensaje de KLER AI")
         if not recipient or not message:
             return "Error: Gmail requiere un 'recipient' (email de destino) y un 'message'."
             

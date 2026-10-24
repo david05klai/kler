@@ -1,4 +1,4 @@
-"""JARVIS Beta — custom importer for .pyc-only distribution."""
+"""KLER Beta — custom importer for .pyc-only distribution."""
 import importlib.machinery, importlib.util, sys, pathlib
 
 class _PycFinder(importlib.machinery.FileFinder):

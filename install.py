@@ -28,7 +28,7 @@ def print_banner():
 
 def main():
     print_banner()
-    print("Este asistente preparará a JARVIS para funcionar de forma óptima.")
+    print("Este asistente preparará a KLER para funcionar de forma óptima.")
     print()
     print(" [1] Comenzar instalación limpia (Recomendado)")
     print(" [2] Salir")
@@ -63,7 +63,7 @@ def main():
             except Exception:
                 pass
                 
-    archivos_basura = ["jarvis.log", "JARVIS_Beta_Installer.exe"]
+    archivos_basura = ["jarvis.log", "KLER_Beta_Installer.exe"]
     for f in os.listdir("."):
         if f.endswith(".spec") or f in archivos_basura:
             try:
@@ -97,7 +97,7 @@ def main():
     # FASE 3: Instalación de dependencias
     os.system("cls")
     print_banner()
-    print("\033[36m [FASE 3/5] - Instalando dependencias de JARVIS...\033[0m")
+    print("\033[36m [FASE 3/5] - Instalando dependencias de KLER...\033[0m")
     print()
     print("Esto puede tomar unos minutos dependiendo de tu conexión a Internet.")
     print("Instalando requerimientos de forma segura...")
@@ -139,7 +139,7 @@ def main():
         if os.path.exists(api_keys_template):
             shutil.copy2(api_keys_template, api_keys_path)
             print("\033[32m[OK] Archivo api_keys.json creado desde plantilla.\033[0m")
-            print("\033[33m[INFO] Al iniciar JARVIS se te pedirán tus API Keys de Gemini y OpenRouter.\033[0m")
+            print("\033[33m[INFO] Al iniciar KLER se te pedirán tus API Keys de Gemini y OpenRouter.\033[0m")
         else:
             # Crear un archivo mínimo con campos vacíos
             import json
@@ -160,13 +160,13 @@ def main():
                 "spotify_redirect_uri": "http://127.0.0.1:8888/callback",
                 "tmdb_api_key": "",
                 "openrouter_api_key": "",
-                "jarvis_theme": "gold",
+                "jarvis_theme": "cyan",
                 "gpu_acceleration": False
             }
             with open(api_keys_path, "w", encoding="utf-8") as f:
                 json.dump(default_config, f, indent=4)
             print("\033[32m[OK] Archivo api_keys.json creado con valores por defecto.\033[0m")
-            print("\033[33m[INFO] Al iniciar JARVIS se te pedirán tus API Keys de Gemini y OpenRouter.\033[0m")
+            print("\033[33m[INFO] Al iniciar KLER se te pedirán tus API Keys de Gemini y OpenRouter.\033[0m")
     else:
         print("\033[32m[OK] Archivo api_keys.json existente detectado.\033[0m")
     
@@ -190,16 +190,16 @@ def main():
     
     try:
         current_dir = os.getcwd()
-        icon_path = os.path.join(current_dir, "assets", "jarvis_icono.ico")
-        target_vbs = os.path.join(current_dir, "Iniciar JARVIS Beta.vbs")
+        icon_path = os.path.join(current_dir, "assets", "kler.ico")
+        target_vbs = os.path.join(current_dir, "Iniciar Kler Beta.vbs")
         
         # Crear acceso directo con PowerShell
         ps_cmd = (
-            f"$s=(New-Object -ComObject WScript.Shell).CreateShortcut(([System.Environment]::GetFolderPath('Desktop')+'\\JARVIS AI.lnk'));"
+            f"$s=(New-Object -ComObject WScript.Shell).CreateShortcut(([System.Environment]::GetFolderPath('Desktop')+'\\KLER AI.lnk'));"
             f"$s.TargetPath='{target_vbs}';"
             f"$s.WorkingDirectory='{current_dir}';"
             f"$s.IconLocation='{icon_path}';"
-            f"$s.Description='Lanzador de JARVIS AI (Admin)';"
+            f"$s.Description='Lanzador de KLER AI (Admin)';"
             f"$s.Save()"
         )
         
@@ -209,7 +209,7 @@ def main():
         # El flag está en el byte 21 del archivo .lnk (bit 0x20)
         try:
             desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-            lnk_path = os.path.join(desktop, "JARVIS AI.lnk")
+            lnk_path = os.path.join(desktop, "KLER AI.lnk")
             if os.path.exists(lnk_path):
                 with open(lnk_path, "rb") as f:
                     data = bytearray(f.read())
@@ -219,7 +219,7 @@ def main():
         except Exception:
             pass  # El VBS ya tiene auto-elevación, esto es redundante
         
-        print("\033[32m[OK] Acceso directo 'JARVIS AI' creado en el Escritorio (con permisos de Admin).\033[0m")
+        print("\033[32m[OK] Acceso directo 'KLER AI' creado en el Escritorio (con permisos de Admin).\033[0m")
     except Exception as e:
         print(f"\033[33m[ADVERTENCIA] No se pudo crear el acceso directo de forma automática: {e}\033[0m")
         
@@ -232,11 +232,11 @@ def main():
     print("     ¡INSTALACIÓN Y CONFIGURACIÓN COMPLETADA CON ÉXITO!")
     print("=======================================================================\033[0m")
     print()
-    print("JARVIS está listo para servirte.")
+    print("KLER está listo para servirte.")
     print("Al iniciar el sistema por primera vez se te solicitarán tus API Keys")
     print("para Gemini y OpenRouter automáticamente de forma visual.")
     print()
-    print(" [1] Iniciar JARVIS ahora mismo")
+    print(" [1] Iniciar KLER ahora mismo")
     print(" [2] Salir")
     print()
     
@@ -246,15 +246,15 @@ def main():
         launch_opt = "2"
         
     if launch_opt == "1":
-        print("Iniciando JARVIS...")
+        print("Iniciando KLER...")
         try:
             # Ejecutar el VBS silencioso
-            os.startfile("Iniciar JARVIS Beta.vbs")
+            os.startfile("Iniciar Kler Beta.vbs")
         except Exception:
             # Fallback si no está asociado
-            subprocess.Popen(["wscript.exe", "Iniciar JARVIS Beta.vbs"])
+            subprocess.Popen(["wscript.exe", "Iniciar Kler Beta.vbs"])
             
-    print("\nGracias por usar el instalador de JARVIS AI.")
+    print("\nGracias por usar el instalador de KLER AI.")
     time.sleep(2)
 
 if __name__ == "__main__":

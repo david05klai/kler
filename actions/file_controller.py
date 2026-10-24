@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-file_controller.py — Pure Python robust file and directory operations manager for JARVIS.
+file_controller.py — Pure Python robust file and directory operations manager for KLER.
 """
 import os
 import shutil

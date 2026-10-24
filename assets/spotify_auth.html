@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JARVIS — Conectar Spotify</title>
+  <title>KLER — Conectar Spotify</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
   <style>
@@ -448,9 +448,9 @@
       </div>
     </div>
 
-    <h1>Conectar <span>Spotify</span><br>a JARVIS</h1>
+    <h1>Conectar <span>Spotify</span><br>a KLER</h1>
     <p class="subtitle">
-      Autoriza a JARVIS para controlar Spotify con tu voz.
+      Autoriza a KLER para controlar Spotify con tu voz.
       El proceso es 100% seguro — nunca almacenamos tu contraseña.
     </p>
 
@@ -512,8 +512,8 @@
     </div>
 
     <div class="footer-note">
-      JARVIS utiliza el protocolo OAuth 2.0 oficial de Spotify.<br>
-      Tus credenciales <strong>nunca</strong> son almacenadas por JARVIS directamente.
+      KLER utiliza el protocolo OAuth 2.0 oficial de Spotify.<br>
+      Tus credenciales <strong>nunca</strong> son almacenadas por KLER directamente.
     </div>
   </div>
 
@@ -544,7 +544,7 @@
       hideAll();
       document.getElementById('statusLoading').style.display = 'flex';
 
-      // Trigger the auth via JARVIS local server
+      // Trigger the auth via KLER local server
       fetch('/spotify/auth', { method: 'POST' })
         .then(r => r.json())
         .then(data => {
@@ -562,7 +562,7 @@
           }
         })
         .catch(err => {
-          showError('No se pudo contactar JARVIS. Asegúrate de que JARVIS esté ejecutándose.');
+          showError('No se pudo contactar KLER. Asegúrate de que KLER esté ejecutándose.');
           btn.disabled = false;
         });
 

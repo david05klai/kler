@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-self_edit.py — Permite a JARVIS editar sus propios archivos de código fuente.
+self_edit.py — Permite a KLER editar sus propios archivos de código fuente.
 Crea backups automáticos antes de cada modificación para seguridad.
 """
 import os
@@ -9,9 +9,9 @@ import difflib
 from pathlib import Path
 from datetime import datetime
 
-# Raíz del proyecto JARVIS
-JARVIS_ROOT = Path(__file__).resolve().parent.parent
-BACKUP_DIR = JARVIS_ROOT / "backups"
+# Raíz del proyecto KLER
+KLER_ROOT = Path(__file__).resolve().parent.parent
+BACKUP_DIR = KLER_ROOT / "backups"
 
 
 def _ensure_backup_dir():
@@ -22,7 +22,7 @@ def _make_backup(file_path: Path) -> str:
     """Crea una copia de seguridad del archivo antes de editarlo."""
     _ensure_backup_dir()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    relative = file_path.relative_to(JARVIS_ROOT)
+    relative = file_path.relative_to(KLER_ROOT)
     safe_name = str(relative).replace(os.sep, "__").replace("/", "__")
     backup_name = f"{safe_name}.{timestamp}.bak"
     backup_path = BACKUP_DIR / backup_name
@@ -32,7 +32,7 @@ def _make_backup(file_path: Path) -> str:
 
 def _resolve_path(file_ref: str) -> Path:
     """
-    Resuelve una referencia de archivo relativa al proyecto JARVIS.
+    Resuelve una referencia de archivo relativa al proyecto KLER.
     Acepta: 'main.py', 'actions/terminal_agent.py', 'core/prompt.txt', etc.
     También acepta rutas absolutas dentro del proyecto.
     """
@@ -40,16 +40,16 @@ def _resolve_path(file_ref: str) -> Path:
     if p.is_absolute():
         # Verificar que esté dentro del proyecto
         try:
-            p.relative_to(JARVIS_ROOT)
+            p.relative_to(KLER_ROOT)
             return p
         except ValueError:
             raise ValueError(
-                f"Ruta fuera del proyecto JARVIS. Solo se pueden editar archivos dentro de: {JARVIS_ROOT}"
+                f"Ruta fuera del proyecto KLER. Solo se pueden editar archivos dentro de: {KLER_ROOT}"
             )
     # Relativa al root del proyecto
-    resolved = (JARVIS_ROOT / p).resolve()
+    resolved = (KLER_ROOT / p).resolve()
     try:
-        resolved.relative_to(JARVIS_ROOT)
+        resolved.relative_to(KLER_ROOT)
     except ValueError:
         raise ValueError(f"Ruta resuelta fuera del proyecto: {resolved}")
     return resolved
@@ -57,7 +57,7 @@ def _resolve_path(file_ref: str) -> Path:
 
 def self_edit(parameters: dict, player=None) -> str:
     """
-    Auto-edición de código de JARVIS.
+    Auto-edición de código de KLER.
     Acciones: read_file, edit_file, append_file, create_file, list_backups, restore_backup
     """
     action = parameters.get("action", "").lower()
@@ -82,7 +82,7 @@ def self_edit(parameters: dict, player=None) -> str:
         if check_file:
             try:
                 fp = _resolve_path(check_file)
-                rel_path = str(fp.relative_to(JARVIS_ROOT)).replace(os.sep, "/").lower()
+                rel_path = str(fp.relative_to(KLER_ROOT)).replace(os.sep, "/").lower()
                 for protected in PROTECTED_FILES:
                     if protected.lower() in rel_path:
                         return (
@@ -244,7 +244,7 @@ def self_edit(parameters: dict, player=None) -> str:
             return "Error: Formato de nombre de backup no reconocido."
         
         original_rel = parts[0].replace("__", os.sep)
-        original_path = JARVIS_ROOT / original_rel
+        original_path = KLER_ROOT / original_rel
 
         try:
             # Backup del estado actual antes de restaurar

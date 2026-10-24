@@ -24,7 +24,7 @@ class TaskQueue:
             except:
                 pass
                 
-        # Iniciar hilo en segundo plano para no bloquear el sistema JARVIS
+        # Iniciar hilo en segundo plano para no bloquear el sistema KLER
         threading.Thread(target=self._process_task, args=(goal, task_id, speak), daemon=True).start()
         return task_id
         
@@ -41,7 +41,7 @@ class TaskQueue:
             # Guardar en el Escritorio
             desktop = os.path.join(os.environ["USERPROFILE"], "Desktop")
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(desktop, f"Reporte_JARVIS_{timestamp}.txt")
+            filename = os.path.join(desktop, f"Reporte_KLER_{timestamp}.txt")
             
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(result)

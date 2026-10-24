@@ -1,1 +1,1 @@
-"""JARVIS Actions package."""
+"""KLER Actions package."""
