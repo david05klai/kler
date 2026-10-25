@@ -6,8 +6,11 @@ class NotificationWatcher:
         self.listener = None
         self.token = None
         self._seen_ids = set()
+        self._loop = None
+        self._pending = set()
 
     async def start(self):
+        self._loop = asyncio.get_running_loop()
         try:
             from winrt.windows.ui.notifications.management import UserNotificationListener, UserNotificationListenerAccessStatus
             import winrt.windows.ui.notifications as notifications
@@ -31,6 +34,9 @@ class NotificationWatcher:
             print(f"[Notifications] Error iniciando watcher: {e}")
 
     def stop(self):
+        for task in self._pending:
+            task.cancel()
+        self._loop = None
         if self.listener and self.token is not None:
             try:
                 self.listener.remove_notification_changed(self.token)
@@ -38,13 +44,15 @@ class NotificationWatcher:
                 pass
 
     def _on_notification_changed(self, listener, args):
-        try:
-            loop = asyncio.get_running_loop()
-            if loop.is_running():
-                # WinRT maneja callbacks en hilos diferentes. Schedule con call_soon_threadsafe:
-                loop.call_soon_threadsafe(lambda: asyncio.create_task(self._process_notifications()))
-        except Exception:
-            pass
+        if self._loop and not self._loop.is_closed():
+            self._loop.call_soon_threadsafe(self._schedule_poll)
+
+    def _schedule_poll(self):
+        if self._pending:
+            return
+        task = asyncio.create_task(self._process_notifications())
+        self._pending.add(task)
+        task.add_done_callback(self._pending.discard)
 
     async def _process_notifications(self):
         try:

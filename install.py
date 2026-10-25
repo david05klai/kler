@@ -111,8 +111,9 @@ def main():
         # Upgrade pip
         subprocess.run([venv_python, "-m", "pip", "install", "--upgrade", "pip"], check=True)
         # Install requirements
-        subprocess.run([venv_python, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
-        print("\033[32m\n[OK] Todas las dependencias se instalaron correctamente.\033[0m")
+        subprocess.run([venv_python, "-m", "pip", "install", "-r", "requirements.txt", "-c", "constraints.txt"], check=True)
+        subprocess.run([venv_python,"download_vosk.py"],check=True,timeout=240)
+        print("Dependencias y modelo de voz instalados.")
     except Exception as e:
         print(f"\033[31m\n[ERROR] Ocurrió un error al instalar dependencias: {e}\033[0m")
         input("Presiona Enter para salir...")
@@ -199,27 +200,13 @@ def main():
             f"$s.TargetPath='{target_vbs}';"
             f"$s.WorkingDirectory='{current_dir}';"
             f"$s.IconLocation='{icon_path}';"
-            f"$s.Description='Lanzador de KLER AI (Admin)';"
+            f"$s.Description='Lanzador de Kler';"
             f"$s.Save()"
         )
         
         subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], check=True)
         
-        # Marcar el .lnk como "Ejecutar como Administrador"
-        # El flag está en el byte 21 del archivo .lnk (bit 0x20)
-        try:
-            desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-            lnk_path = os.path.join(desktop, "KLER AI.lnk")
-            if os.path.exists(lnk_path):
-                with open(lnk_path, "rb") as f:
-                    data = bytearray(f.read())
-                data[21] = data[21] | 0x20  # Set RunAsAdmin flag
-                with open(lnk_path, "wb") as f:
-                    f.write(data)
-        except Exception:
-            pass  # El VBS ya tiene auto-elevación, esto es redundante
-        
-        print("\033[32m[OK] Acceso directo 'KLER AI' creado en el Escritorio (con permisos de Admin).\033[0m")
+        print("\033[32m[OK] Acceso directo 'KLER AI' creado en el Escritorio .\033[0m")
     except Exception as e:
         print(f"\033[33m[ADVERTENCIA] No se pudo crear el acceso directo de forma automática: {e}\033[0m")
         

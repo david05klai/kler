@@ -261,12 +261,12 @@
         <!-- Left Synaptic Stats Overlay -->
         <div id="synaptic-stats" class="font-mono">
             <div class="flex flex-col items-start">
-                <span class="opacity-50 text-[8px] tracking-widest">Core Sync</span>
-                <span id="stat-sync" class="font-bold text-sm mt-0.5">99.2%</span>
+                <span class="opacity-50 text-[8px] tracking-widest">Respuesta</span>
+                <span id="stat-sync" class="font-bold text-sm mt-0.5">—</span>
             </div>
             <div class="flex flex-col items-start">
-                <span class="opacity-50 text-[8px] tracking-widest">Synaptic Load</span>
-                <span id="stat-load" class="font-bold text-sm mt-0.5">8 ms</span>
+                <span class="opacity-50 text-[8px] tracking-widest">Herramienta</span>
+                <span id="stat-load" class="font-bold text-sm mt-0.5">—</span>
             </div>
         </div>
 
@@ -398,7 +398,7 @@
                 let speedMultiplier = 1;
                 if (currentState === "THINKING") speedMultiplier = 4.5;
                 else if (currentState === "SPEAKING") speedMultiplier = 2.0;
-                else if (currentState === "MUTED") speedMultiplier = 0.25;
+                else if ((currentState === "MUTED" || currentState === "SLEEPING")) speedMultiplier = 0.25;
 
                 this.pulse += this.pulseSpeed * speedMultiplier;
                 if (this.synapticFiring > 0) this.synapticFiring -= 0.04;
@@ -506,10 +506,22 @@
             anim.onfinish = () => particle.remove();
         }
 
+        let renderingActive = true;
+        window.setRenderingActive = function(active) {
+            const changed = !renderingActive && active;
+            renderingActive = active;
+            if (changed) requestAnimationFrame(animate);
+        };
+        document.addEventListener("visibilitychange", () => window.setRenderingActive(!document.hidden));
+        window.updateMetrics = function(metrics) {
+            document.getElementById("stat-sync").textContent = metrics.response ? metrics.response.last_ms + " ms" : "—";
+            document.getElementById("stat-load").textContent = metrics.tool ? metrics.tool.last_ms + " ms" : "—";
+        };
         function animate(timestamp) {
+            if (!renderingActive) return;
             // Frame rate limiting based on performance quality
             // Quality 100: ~60fps, Quality 50: ~30fps, Quality 10: ~10fps
-            let targetFps = 10 + (activeQuality / 100) * 50;
+            let targetFps = currentState === "SLEEPING" || (currentState === "MUTED" || currentState === "SLEEPING") ? 8 : 10 + (activeQuality / 100) * 30;
             let interval = 1000 / targetFps;
             
             if (timestamp) {
@@ -540,7 +552,7 @@
             let noise = (Math.random() - 0.5) * 0.12;
             let intensity = baseIntensity;
 
-            if (currentState === "MUTED") {
+            if ((currentState === "MUTED" || currentState === "SLEEPING")) {
                 intensity = 0.5;
                 rotationY += 0.0006;
                 rotationX += 0.0002;
@@ -592,7 +604,7 @@
 
             // Calculate dynamic distance threshold: only connect true nearby surface neighbors!
             let distThreshold = currentRadius * 0.75;
-            if (currentState === "MUTED") {
+            if ((currentState === "MUTED" || currentState === "SLEEPING")) {
                 distThreshold = currentRadius * 0.55;
             } else if (currentState === "THINKING") {
                 distThreshold = currentRadius * 0.85;
@@ -605,7 +617,7 @@
             }
 
             // Connections scaling: quality < 20 completely disables lines for massive CPU/GPU saving!
-            const connectionLimit = (activeQuality < 20) ? 0 : ((currentState === "MUTED") ? 1 : ((currentState === "THINKING") ? 5 : 3));
+            const connectionLimit = (activeQuality < 20) ? 0 : (((currentState === "MUTED" || currentState === "SLEEPING")) ? 1 : ((currentState === "THINKING") ? 5 : 3));
 
             if (connectionLimit > 0) {
                 for (let i = 0; i < nodes.length; i++) {
@@ -666,9 +678,6 @@
             renderQueue.forEach(item => item.draw());
 
             // Stats
-            document.getElementById('stat-sync').textContent = (currentState === "THINKING" ? (99.4 + Math.random() * 0.5) : (98.8 + Math.random() * 0.8)).toFixed(1) + '%';
-            document.getElementById('stat-load').textContent = (currentState === "THINKING" ? Math.floor(2 + Math.random() * 4) : (currentState === "MUTED" ? '0' : Math.floor(6 + Math.random() * 7))) + ' ms';
-
             // Particles: quality < 30 disables ambient floating particles
             if (currentState !== "MUTED" && activeQuality > 30) {
                 const particleChance = (currentState === "THINKING") ? 0.4 : ((currentState === "SPEAKING") ? 0.6 : 0.985);
@@ -683,11 +692,13 @@
         // Click actions
         function onMicTriggerClick() {
             if (pyBridge) {
+                if (currentState === "SLEEPING") { pyBridge.wake(); return; }
                 pyBridge.toggle_mute();
             }
         }
 
         function setMuteFromWeb(mute) {
+            if (!mute && currentState === "SLEEPING" && pyBridge) { pyBridge.wake(); return; }
             if (isMuted !== mute) {
                 onMicTriggerClick();
             }

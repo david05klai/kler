@@ -1,0 +1,6 @@
+# Optional account and Windows integrations
+python-telegram-bot==22.8
+winrt-runtime==4.0.3
+winrt-Windows.UI.Notifications==4!10.0.28000.2705
+winrt-Windows.UI.Notifications.Management==4!10.0.28000.2705
+yt-dlp==2026.10.21

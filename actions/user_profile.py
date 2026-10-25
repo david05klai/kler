@@ -1,40 +1,47 @@
-"""user_profile.py — Clean user habit & configuration recorder."""
+"""Persistent preferences and actual action counters."""
 import json
-from pathlib import Path
+import threading
+from core.storage import get_state,set_state
+_lock = threading.RLock()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-PROFILE_PATH = BASE_DIR / "config" / "user_profile.json"
+def _load_profile():
+    return get_state("user_profile",{"name":"Señor","habits":{},"preferences":{},"notes":[]})
+def _save_profile(profile):
+    set_state("user_profile",profile)
 
-def user_profile(parameters: dict, player=None) -> str:
-    """Manage general user profile variables."""
-    action = parameters.get("action", "").lower()
-    if action == "get":
+def user_profile(parameters: dict, player=None):
+    try:
+        with _lock:
+            profile = _load_profile()
+            action = parameters.get("action","view")
+            if action in {"get","view"}:
+                return json.dumps(profile,ensure_ascii=False)
+            if action in {"notes","habits"}:
+                return json.dumps(profile.get(action,{}),ensure_ascii=False)
+            if action=="set_name":
+                if not parameters.get("name"):
+                    raise ValueError("Falta el nombre.")
+                profile["name"] = parameters["name"]
+            elif action=="set_preference":
+                if not parameters.get("key"):
+                    raise ValueError("Falta la clave de preferencia.")
+                profile.setdefault("preferences",{})[parameters["key"]] = parameters.get("value","")
+            elif action=="add_note":
+                if not parameters.get("note"):
+                    raise ValueError("La nota está vacía.")
+                profile.setdefault("notes",[]).append(parameters["note"])
+            elif action=="reset":
+                profile = {"name":"Señor","habits":{},"preferences":{},"notes":[]}
+            else:
+                raise ValueError("Acción de perfil desconocida.")
+            _save_profile(profile)
+            return "Perfil guardado."
+    except Exception as exc:
+        return f"Error de perfil: {exc}"
+
+def record_action(name,args):
+    with _lock:
         profile = _load_profile()
-        return f"User preferences: {json.dumps(profile)}"
-    return "User profile updated."
-
-def _load_profile() -> dict:
-    if not PROFILE_PATH.exists():
-        return {"name": "Sir", "habits": {}}
-    try:
-        return json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return {"name": "Sir", "habits": {}}
-
-def _save_profile(profile: dict) -> None:
-    try:
-        PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        PROFILE_PATH.write_text(json.dumps(profile, indent=2), encoding="utf-8")
-    except Exception:
-        pass
-
-def record_action(name: str, args: dict) -> None:
-    """Log executed actions to track user habits over time."""
-    try:
-        profile = _load_profile()
-        habits = profile.setdefault("habits", {})
-        count = habits.get(name, 0)
-        habits[name] = count + 1
+        habits = profile.setdefault("habits",{})
+        habits[name] = habits.get(name,0)+1
         _save_profile(profile)
-    except Exception:
-        pass

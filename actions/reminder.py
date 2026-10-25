@@ -1,44 +1,30 @@
-"""reminder.py — Clean reminder & notification system."""
-import threading
-import time
+"""Durable reminders with absolute dates and relative delays."""
+import re
+from datetime import timedelta
+from core.jobs import create_job, local_now, parse_datetime, start_runner
 
-def reminder(parameters: dict, response=None, player=None) -> str:
-    """Set a simple thread-based timer reminder."""
-    text = parameters.get("message", "").strip()
-    delay_str = str(parameters.get("time", "1m")).lower().strip()
-    
-    # Calculate delay in seconds
-    seconds = 60
+
+def reminder(parameters: dict, response=None, player=None, speak=None) -> str:
     try:
-        if delay_str.endswith("s"):
-            seconds = int(delay_str[:-1])
-        elif delay_str.endswith("m"):
-            seconds = int(delay_str[:-1]) * 60
-        elif delay_str.endswith("h"):
-            seconds = int(delay_str[:-1]) * 3600
-        elif delay_str.isdigit():
-            seconds = int(delay_str)
-    except Exception:
-        seconds = 60
-
-    if not text:
-        text = "Reminder triggered, sir."
-        
-    def _run_reminder():
-        time.sleep(seconds)
-        # Notify
-        try:
-            import winsound
-            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
-        except Exception:
-            pass
+        message = str(parameters.get("message", "")).strip()
+        if not message:
+            raise ValueError("Indica el mensaje del recordatorio.")
+        value = str(parameters.get("time", "")).strip().lower()
+        if parameters.get("date"):
+            due = parse_datetime(f"{parameters['date']} {value}")
+        else:
+            match = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([smhd]?)", value)
+            if not match:
+                raise ValueError("Usa fecha y hora HH:MM, o un plazo como 30s, 10m, 2h o 1d.")
+            seconds = float(match[1]) * {"":1,"s":1,"m":60,"h":3600,"d":86400}[match[2]]
+            due = local_now() + timedelta(seconds=seconds)
+        if due <= local_now():
+            raise ValueError("El recordatorio debe ser para una fecha futura.")
+        job_id = create_job(message, due.timestamp(), "notify", {"message": message})
+        start_runner(player, speak)
+        result = f"Recordatorio {job_id} guardado para {due.isoformat()}. Kler debe estar abierto; si lo cierras, avisará al volver."
         if player:
-            player.write_log(f"⏰ REMINDER: {text}")
-            player.speak(f"Sir, I must remind you: {text}")
-
-    threading.Thread(target=_run_reminder, daemon=True).start()
-    
-    msg = f"Reminder set for '{text}' in {delay_str}."
-    if player:
-        player.write_log(f"⏰ {msg}")
-    return msg
+            player.write_log(result)
+        return result
+    except Exception as exc:
+        return f"Error al crear recordatorio: {exc}"

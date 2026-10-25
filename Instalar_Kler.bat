@@ -1,15 +1,6 @@
 @echo off
 title Instalador de KLER AI
 
-:: ── Solicitar permisos de Administrador ──────────────────────────────────────
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [INFO] Solicitando permisos de administrador...
-    powershell -Command "Start-Process -Verb RunAs -FilePath '%~f0'"
-    exit /b
-)
-
-:: Ya somos admin — establecer directorio de trabajo
 cd /d "%~dp0"
 
 :: 1. Comprobar si existe el Python del entorno virtual local primero

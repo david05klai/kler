@@ -1,9 +1,11 @@
+"""Bounded priority queue for background research."""
+import logging
+import os
+import queue
 import threading
 import uuid
-import time
-import os
+from pathlib import Path
 from datetime import datetime
-from actions.openrouter_agent import openrouter_agent
 
 class TaskPriority:
     LOW = 1
@@ -11,49 +13,66 @@ class TaskPriority:
     HIGH = 3
 
 class TaskQueue:
-    def __init__(self):
-        self.queue = []
+    def __init__(self, workers=2, max_pending=8):
+        self.queue = queue.PriorityQueue(maxsize=max_pending)
+        self._stop = threading.Event()
+        self._workers = []
+        self._count = 0
         self._lock = threading.Lock()
-        
-    def submit(self, goal: str, priority: int = TaskPriority.NORMAL, speak=None) -> str:
-        task_id = str(uuid.uuid4())[:8]
-        if speak:
-            try:
-                # Utilizamos una lambda para que no bloquee si la API de TTS es lenta
-                threading.Thread(target=speak, args=(f"Encolando tarea compleja. Te avisaré cuando el reporte esté listo.",)).start()
-            except:
-                pass
-                
-        # Iniciar hilo en segundo plano para no bloquear el sistema KLER
-        threading.Thread(target=self._process_task, args=(goal, task_id, speak), daemon=True).start()
-        return task_id
-        
-    def _process_task(self, goal: str, task_id: str, speak):
-        prompt = (
-            f"El usuario ha solicitado una tarea compleja o de investigación. Por favor cumple con lo siguiente y genera un reporte detallado: {goal}\n\n"
-            "Formatea la salida en Markdown, utiliza títulos claros, viñetas y asegúrate de ser lo más exhaustivo y útil posible."
-        )
-        
+        for i in range(workers):
+            thread = threading.Thread(target=self._work, name=f"kler-research-{i}", daemon=True)
+            thread.start()
+            self._workers.append(thread)
+
+    def submit(self, goal, priority=TaskPriority.NORMAL, speak=None):
+        task_id = uuid.uuid4().hex[:8]
+        with self._lock:
+            self._count += 1
+            sequence = self._count
         try:
-            # Reutilizamos el agente de OpenRouter (claude 3.5 u otro) para el trabajo pesado
-            result = openrouter_agent(query=prompt)
-            
-            # Guardar en el Escritorio
-            desktop = os.path.join(os.environ["USERPROFILE"], "Desktop")
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(desktop, f"Reporte_KLER_{timestamp}.txt")
-            
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(result)
-                
-            if speak:
-                speak(f"He terminado el reporte. Lo acabo de guardar en tu escritorio.")
-        except Exception as e:
-            if speak:
-                speak(f"Ocurrió un error al procesar el reporte.")
-            print(f"[AgentTask] Error en tarea {task_id}: {e}")
+            self.queue.put_nowait((-priority, sequence, goal, task_id, speak))
+        except queue.Full:
+            return "Error: hay demasiadas tareas pendientes. Espera a que termine una."
+        if speak:
+            speak("Tarea encolada. Te avisaré cuando termine.")
+        return task_id
 
-_instance = TaskQueue()
+    def _work(self):
+        while not self._stop.is_set():
+            try:
+                _, _, goal, task_id, speak = self.queue.get(timeout=0.5)
+            except queue.Empty:
+                continue
+            try:
+                self._process_task(goal, task_id, speak)
+            finally:
+                self.queue.task_done()
 
+    def _process_task(self, goal, task_id, speak):
+        from actions.openrouter_agent import openrouter_agent
+        try:
+            result = openrouter_agent(str(goal))
+            if str(result).lower().startswith(("error", "no se encontró", "no se pudo")):
+                raise RuntimeError(result)
+            desktop = Path(os.environ.get("USERPROFILE", str(Path.home()))) / "Desktop"
+            desktop.mkdir(parents=True, exist_ok=True)
+            target = desktop / f"Reporte_Kler_{datetime.now():%Y%m%d_%H%M%S}_{task_id}.md"
+            target.write_text(str(result), encoding="utf-8")
+            if speak:
+                speak(f"Reporte terminado y guardado en {target.name}.")
+        except Exception:
+            logging.exception("Research task %s failed", task_id)
+            if speak:
+                speak("La tarea falló. Revisa el historial para ver el error.")
+
+    def shutdown(self):
+        self._stop.set()
+
+_instance = None
+_instance_lock = threading.Lock()
 def get_queue():
+    global _instance
+    with _instance_lock:
+        if _instance is None:
+            _instance = TaskQueue()
     return _instance

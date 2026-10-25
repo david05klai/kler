@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
     QGridLayout, QLabel, QPushButton, QLineEdit, QTextEdit, 
     QListWidget, QListWidgetItem, QProgressBar, QDialog, QMessageBox,
     QComboBox, QCheckBox, QGraphicsDropShadowEffect, QGraphicsOpacityEffect,
-    QScrollArea, QSlider, QFrame, QGroupBox
+    QScrollArea, QSlider, QFrame, QGroupBox, QPlainTextEdit
 )
 from PyQt6.QtCore import Qt, QUrl, pyqtSignal, pyqtSlot, QObject, QTimer, QSize, QPropertyAnimation
 from PyQt6.QtGui import QFont, QColor, QIcon, QMouseEvent
@@ -103,6 +103,11 @@ class WebBridge(QObject):
             self.orb.ui._win._toggle_mute()
 
     @pyqtSlot()
+    def wake(self):
+        if self.orb.ui:
+            self.orb.ui._win._wake_sig.emit()
+
+    @pyqtSlot()
     def request_theme(self):
         QTimer.singleShot(0, self.orb.sync_theme)
 
@@ -170,7 +175,8 @@ class CustomParticleOrb(QWidget):
         print(f"[ORB] QWebEngineView loadFinished: {ok}")
         if ok:
             self.sync_theme()
-            self.set_state("MUTED" if self.ui.muted else "LISTENING")
+            QTimer.singleShot(0, self.ui._win._sync_visibility)
+            self.set_state("MUTED" if self.ui.muted else getattr(self.ui, "current_state", "SLEEPING"))
             try:
                 from memory.config_manager import load_api_keys
                 cfg = load_api_keys()
@@ -472,6 +478,7 @@ class ClockWidget(QWidget):
 
 
 class WeatherWidget(QWidget):
+    _weather_sig = pyqtSignal(object)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("WeatherWidget")
@@ -488,23 +495,29 @@ class WeatherWidget(QWidget):
         
         self.lbl_title = QLabel("WEATHER REPORT")
         header.addWidget(self.lbl_title)
+        self.refresh_weather = QPushButton("↻")
+        self.refresh_weather.setToolTip("Consultar clima actual")
+        self.refresh_weather.setFixedSize(25,25)
+        self.refresh_weather.clicked.connect(self._refresh_weather)
+        self._weather_sig.connect(self._apply_weather)
+        header.addWidget(self.refresh_weather)
         header.addStretch()
         layout.addLayout(header)
         
         info = QHBoxLayout()
-        self.lbl_temp = QLabel("18°C")
+        self.lbl_temp = QLabel("—")
         self.lbl_temp.setStyleSheet("font-size: 20px; font-weight: bold; border: none; background: transparent; color: white;")
         info.addWidget(self.lbl_temp)
         
-        self.lbl_desc = QLabel("Parcialmente Nublado")
+        self.lbl_desc = QLabel("Sin consultar")
         info.addWidget(self.lbl_desc)
         info.addStretch()
         layout.addLayout(info)
         
         details = QHBoxLayout()
-        self.lbl_humidity = QLabel("Humedad: 82%")
+        self.lbl_humidity = QLabel("Humedad: —")
         self.lbl_humidity.setStyleSheet("font-size: 10px; color: #94a3b8; border: none; background: transparent;")
-        self.lbl_wind = QLabel("Viento: 12 km/h")
+        self.lbl_wind = QLabel("Viento: —")
         self.lbl_wind.setStyleSheet("font-size: 10px; color: #94a3b8; border: none; background: transparent;")
         
         details.addWidget(self.lbl_humidity)
@@ -512,6 +525,36 @@ class WeatherWidget(QWidget):
         details.addStretch()
         layout.addLayout(details)
         
+    def _refresh_weather(self):
+        self.refresh_weather.setEnabled(False)
+        import threading
+        def fetch():
+            try:
+                import requests
+                from memory.config_manager import load_api_keys
+                from urllib.parse import quote
+                city = load_api_keys().get("weather_city","Bogotá")
+                response=requests.get("https://wttr.in/"+quote(city)+"?format=j1",timeout=(5,10))
+                response.raise_for_status()
+                current=response.json()["current_condition"][0]
+                self._weather_sig.emit({"city":city,"temperature":current["temp_C"],"humidity":current["humidity"],
+                                        "wind":current["windspeedKmph"],"description":current["weatherDesc"][0]["value"]})
+            except Exception as exc:
+                self._weather_sig.emit({"error":str(exc)})
+        threading.Thread(target=fetch,name="kler-weather",daemon=True).start()
+
+    def _apply_weather(self, data):
+        self.refresh_weather.setEnabled(True)
+        if data.get("error"):
+            self.lbl_desc.setText("No disponible")
+            self.lbl_desc.setToolTip(data["error"])
+            return
+        self.lbl_temp.setText(str(data["temperature"])+"°C")
+        self.lbl_desc.setText(data["city"])
+        self.lbl_desc.setToolTip(data["description"])
+        self.lbl_humidity.setText("Humedad: "+str(data["humidity"])+"%")
+        self.lbl_wind.setText("Viento: "+str(data["wind"])+" km/h")
+
     def update_style(self):
         self.setStyleSheet(f"""
             QWidget#WeatherWidget {{
@@ -703,6 +746,13 @@ class TodoWidget(QWidget):
         self.lst_todo.setStyleSheet("QListWidget { border: none; background: transparent; } QListWidget::item { padding: 4px; color: white; }")
         layout.addWidget(self.lst_todo)
         
+        from core.storage import get_state
+        for saved in get_state("todos", []):
+            item = QListWidgetItem(saved["text"])
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked if saved.get("done") else Qt.CheckState.Unchecked)
+            self.lst_todo.addItem(item)
+        self.lst_todo.itemChanged.connect(self._save_tasks)
         self.btn_add.clicked.connect(self.add_task)
         self.txt_task.returnPressed.connect(self.add_task)
         
@@ -714,6 +764,13 @@ class TodoWidget(QWidget):
             item.setCheckState(Qt.CheckState.Unchecked)
             self.lst_todo.addItem(item)
             self.txt_task.clear()
+            self._save_tasks()
+
+    def _save_tasks(self):
+        from core.storage import set_state
+        set_state("todos", [{"text":self.lst_todo.item(i).text(),
+                   "done":self.lst_todo.item(i).checkState() == Qt.CheckState.Checked}
+                  for i in range(self.lst_todo.count())])
 
     def update_style(self):
         self.setStyleSheet(f"""
@@ -749,7 +806,14 @@ class NotesWidget(QWidget):
         layout.addLayout(header)
         
         self.txt_notes = QTextEdit()
-        self.txt_notes.setPlaceholderText("Write details...")
+        self.txt_notes.setPlaceholderText("Tus notas se guardan automáticamente…")
+        from core.storage import get_state, set_state
+        self.txt_notes.setPlainText(get_state("notes", ""))
+        self._save_timer = QTimer(self)
+        self._save_timer.setSingleShot(True)
+        self._save_timer.setInterval(300)
+        self._save_timer.timeout.connect(lambda: set_state("notes", self.txt_notes.toPlainText()))
+        self.txt_notes.textChanged.connect(lambda: self._save_timer.start())
         layout.addWidget(self.txt_notes)
 
     def update_style(self):
@@ -852,6 +916,8 @@ class FilesPanel(QWidget):
 
 
 class DeviceSettingsDialog(QDialog):
+    _google_status_sig = pyqtSignal(str)
+    _check_status_sig = pyqtSignal(str)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("KLER Settings Configuration Control")
@@ -1102,7 +1168,91 @@ class DeviceSettingsDialog(QDialog):
         main_layout.addLayout(btn_layout)
         
         self.btn_save.clicked.connect(self.save)
+        self._build_tools_tab()
         self.load_settings()
+
+    def _build_tools_tab(self):
+        from core.capabilities import TOOL_LABELS, DEFAULT_TOOLS
+        from memory.config_manager import load_api_keys
+        cfg = load_api_keys()
+        tab = QWidget()
+        outer = QVBoxLayout(tab)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        hint = QLabel("Activa las funciones que usas. Google requiere tu autorización; los modelos locales deben admitir herramientas.")
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
+        self.tool_checks = {}
+        enabled = set(cfg.get("enabled_tools", DEFAULT_TOOLS))
+        for name,label in TOOL_LABELS.items():
+            checkbox = QCheckBox(label)
+            checkbox.setChecked(name in enabled)
+            layout.addWidget(checkbox)
+            self.tool_checks[name] = checkbox
+        self.allow_code = QCheckBox("Permitir ejecutar código generado con mis permisos (sin aislamiento)")
+        self.allow_code.setChecked(bool(cfg.get("allow_generated_code", False)))
+        layout.addWidget(self.allow_code)
+        self.extra_fields = {}
+        fields = [
+            ("live_model","Modelo de voz de Gemini",cfg.get("live_model","models/gemini-2.5-flash-native-audio-preview-12-2025")),
+            ("openrouter_model","Modelo de OpenRouter",cfg.get("openrouter_model","google/gemini-2.5-flash")),
+            ("image_model","Modelo de imágenes",cfg.get("image_model","gemini-2.5-flash-image")),
+            ("weather_city","Ciudad para el clima",cfg.get("weather_city","Bogotá")),
+            ("sleep_after_seconds","Segundos antes de volver a esperar «Kler»",str(cfg.get("sleep_after_seconds",20))),
+            ("home_assistant_url","URL de Home Assistant",cfg.get("home_assistant_url","")),
+            ("home_assistant_token","Token de Home Assistant",cfg.get("home_assistant_token",""))]
+        for key,label,value in fields:
+            layout.addWidget(QLabel(label))
+            field = QLineEdit(str(value))
+            if key.endswith("token"):
+                field.setEchoMode(QLineEdit.EchoMode.Password)
+            layout.addWidget(field)
+            self.extra_fields[key] = field
+        self.extra_flags = {}
+        for key,label in [("notifications_enabled","Mostrar notificaciones de Windows"),("telegram_enabled","Activar el bot de Telegram al iniciar")]:
+            checkbox = QCheckBox(label)
+            checkbox.setChecked(bool(cfg.get(key,False)))
+            layout.addWidget(checkbox)
+            self.extra_flags[key] = checkbox
+        self.google_status = QLabel("Para conectar Google: guarda el cliente OAuth en config/google_credentials.json.")
+        self.google_status.setWordWrap(True)
+        layout.addWidget(self.google_status)
+        self._google_status_sig.connect(self.google_status.setText)
+        for name,label in [("gmail","Conectar Gmail"),("calendar","Conectar Calendar"),("drive","Conectar Drive")]:
+            button = QPushButton(label)
+            button.clicked.connect(lambda checked=False,service=name:self._connect_google(service))
+            layout.addWidget(button)
+        self.check_status = QLabel("")
+        self.check_status.setWordWrap(True)
+        self._check_status_sig.connect(self.check_status.setText)
+        layout.addWidget(self.check_status)
+        check = QPushButton("Comprobar instalación")
+        check.clicked.connect(self._check_installation)
+        layout.addWidget(check)
+        scroll.setWidget(content)
+        outer.addWidget(scroll)
+        self.tabs.addTab(tab, "Herramientas")
+
+    def _connect_google(self, name):
+        self.google_status.setText("Esperando autorización en el navegador…")
+        import threading
+        def connect():
+            try:
+                from core.google_services import get_service
+                get_service(name, authorize=True)
+                self._google_status_sig.emit(name + " conectado. Guarda los ajustes para aplicar las herramientas.")
+            except Exception as exc:
+                self._google_status_sig.emit("Error: " + str(exc))
+        threading.Thread(target=connect, name="kler-google-oauth", daemon=True).start()
+
+    def _check_installation(self):
+        import threading
+        def check():
+            from core.preflight import inspect_installation
+            self._check_status_sig.emit("\n".join(inspect_installation()))
+        threading.Thread(target=check, name="kler-check", daemon=True).start()
 
     def _toggle_ollama_fields(self):
         is_ollama = (self.cmb_ai_provider.currentData() == "ollama")
@@ -1161,7 +1311,7 @@ class DeviceSettingsDialog(QDialog):
             from memory.config_manager import load_api_keys
             cfg = load_api_keys()
             
-            self.inp_gemini.setText(cfg.get("gemini_api_key", ""))
+            self.inp_gemini.setText(";".join(cfg["gemini_api_key"]) if isinstance(cfg.get("gemini_api_key"), list) else cfg.get("gemini_api_key", ""))
             self.inp_openrouter.setText(cfg.get("openrouter_api_key", ""))
             self.inp_deepseek.setText(cfg.get("deepseek_api_key", ""))
             self.inp_groq.setText(cfg.get("groq_api_key", ""))
@@ -1254,7 +1404,7 @@ class DeviceSettingsDialog(QDialog):
             
     def save(self):
         try:
-            from memory.config_manager import save_api_keys
+            from memory.config_manager import save_api_keys, load_api_keys
             theme_val = self.cmb_theme.currentData()
             
             # Camera device fallback
@@ -1263,7 +1413,8 @@ class DeviceSettingsDialog(QDialog):
                 camera_device_val = 0
 
             cfg = {
-                "gemini_api_key": self.inp_gemini.text().strip(),
+                **load_api_keys(),
+                "gemini_api_key": [v.strip() for v in self.inp_gemini.text().split(";") if v.strip()] if ";" in self.inp_gemini.text() else self.inp_gemini.text().strip(),
                 "openrouter_api_key": self.inp_openrouter.text().strip(),
                 "deepseek_api_key": self.inp_deepseek.text().strip(),
                 "groq_api_key": self.inp_groq.text().strip(),
@@ -1288,6 +1439,13 @@ class DeviceSettingsDialog(QDialog):
                 "spotify_client_secret": self.inp_spotify_secret.text().strip(),
                 "spotify_redirect_uri": self.inp_spotify_uri.text().strip()
             }
+            cfg["enabled_tools"] = [name for name,checkbox in self.tool_checks.items() if checkbox.isChecked()]
+            cfg["allow_generated_code"] = self.allow_code.isChecked()
+            cfg.update({key:checkbox.isChecked() for key,checkbox in self.extra_flags.items()})
+            cfg.update({key:field.text().strip() for key,field in self.extra_fields.items()})
+            cfg["sleep_after_seconds"] = max(5,min(300,float(cfg["sleep_after_seconds"])))
+            if cfg["ai_provider"] == "ollama" and not cfg.get("ollama_model"):
+                raise ValueError("Indica un modelo de Ollama instalado.")
             save_api_keys(cfg)
             
             apply_theme_tokens(theme_val)
@@ -1582,6 +1740,9 @@ class DeviceSettingsDialog(QDialog):
 
 class MainWindow(QMainWindow):
     _shutdown_sig = pyqtSignal()
+    _log_sig = pyqtSignal(str)
+    _state_sig = pyqtSignal(str)
+    _wake_sig = pyqtSignal()
     _holo_sig = pyqtSignal(str, str)
     _stream_text_sig = pyqtSignal(str)
     _clear_text_sig = pyqtSignal()
@@ -1611,13 +1772,18 @@ class MainWindow(QMainWindow):
         header_bar = QHBoxLayout(self.header_container)
         header_bar.setContentsMargins(15, 8, 15, 8)
         
-        self.lbl_brand = QLabel("K L A I D A")
+        self.lbl_brand = QLabel("K L E R")
         font = QFont("Century Gothic", 16, QFont.Weight.Bold)
         font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 8.0)
         self.lbl_brand.setFont(font)
         header_bar.addWidget(self.lbl_brand)
+        self.lbl_status = QLabel("Iniciando…")
+        self.lbl_status.setStyleSheet("font-size: 11px; color: #7aeeff; background: transparent;")
+        header_bar.addWidget(self.lbl_status)
         header_bar.addStretch()
         
+        self.btn_history = QPushButton()
+        self.btn_history.setToolTip("Historial y errores")
         self.btn_protocols = QPushButton()
         self.btn_settings = QPushButton()
         self.btn_camera = QPushButton()
@@ -1627,10 +1793,11 @@ class MainWindow(QMainWindow):
         self.btn_close = QPushButton()
         
         self.head_buttons = [
+            (self.btn_history, "fa5s.list", self._show_history),
             (self.btn_protocols, 'fa5s.project-diagram', self._open_protocols),
             (self.btn_settings, 'fa5s.cog', self._open_settings),
             (self.btn_camera, 'fa5s.video', self._toggle_camera_gestures),
-            (self.btn_play, 'fa5s.play', self._toggle_mute),
+            (self.btn_play, 'fa5s.play', self._wake_from_ui),
             (self.btn_folder, 'fa5s.folder', self._open_folder),
             (self.btn_min, 'fa5s.window-minimize', self.showMinimized),
             (self.btn_close, 'fa5s.times', self.close)
@@ -1681,6 +1848,26 @@ class MainWindow(QMainWindow):
         self.txt_console.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.txt_console.setWordWrap(True)
         
+        self.command_input = QLineEdit(self.central_widget)
+        self.command_input.setPlaceholderText("Escribe una orden para Kler…")
+        self.command_input.returnPressed.connect(self._send_text)
+        self.command_input.setStyleSheet("QLineEdit { background: #0a1620; color: #e8fbff; border: 1px solid #005f77; border-radius: 8px; padding: 6px; }")
+        self.history_window = QDialog(self)
+        self.history_window.setWindowTitle("Kler · Historial")
+        self.history_window.resize(760, 450)
+        history_layout = QVBoxLayout(self.history_window)
+        self.history_log = QPlainTextEdit()
+        self.history_log.setReadOnly(True)
+        self.history_log.document().setMaximumBlockCount(1000)
+        history_layout.addWidget(self.history_log)
+        self._log_sig.connect(self._handle_log)
+        self._state_sig.connect(self._handle_state)
+        self._wake_sig.connect(self._wake_from_ui)
+        self._metrics_timer = QTimer(self)
+        self._metrics_timer.setInterval(2000)
+        self._metrics_timer.timeout.connect(self._update_metrics)
+        self._metrics_timer.start()
+
         # Force Close flag and System Tray initialization
         self._force_close = False
         self.tray_icon = None
@@ -1701,6 +1888,76 @@ class MainWindow(QMainWindow):
         self._stream_text_sig.connect(self._handle_stream_text)
         self._clear_text_sig.connect(self._handle_clear_text)
         
+    @pyqtSlot(str)
+    def _handle_state(self, state):
+        labels = {"MUTED":"Micrófono silenciado","SLEEPING":"Di «Kler» para activarme","LISTENING":"Te escucho","SPEAKING":"Hablando","THINKING":"Procesando"}
+        self.lbl_status.setText(labels.get(state, state))
+        self.orb.set_state(state)
+
+    @pyqtSlot(str)
+    def _handle_log(self, text):
+        widgets = {"weather":self.weather_w,"spotify":self.spotify_w,"system":self.system_w,
+                   "notes":self.notes_w,"todo":self.todo_w,"files":self.files_panel}
+        if text == "__hide__":
+            for widget in widgets.values():
+                widget.hide()
+            return
+        if text.startswith(("__widget_show__:", "__widget_close__:")):
+            command, name = text.split(":",1)
+            widget = widgets.get(name)
+            if widget:
+                widget.setVisible(command == "__widget_show__")
+            elif name in {"maps","image"} and self.hologram:
+                self.hologram.setVisible(command == "__widget_show__")
+            return
+        from datetime import datetime
+        self.history_log.appendPlainText(f"{datetime.now():%H:%M:%S}  {text}")
+        if text.startswith(("Error", "ERR:", "Sin conexión")):
+            self.lbl_status.setText(text[:100])
+
+    def _update_metrics(self):
+        from core.diagnostics import snapshot
+        if self.orb.web_view and self.isVisible() and not self.isMinimized():
+            self.orb.web_view.page().runJavaScript("window.updateMetrics && window.updateMetrics(" + json.dumps(snapshot()) + ");")
+
+    def _show_history(self):
+        self.history_window.show()
+        self.history_window.raise_()
+
+    def _send_text(self):
+        text = self.command_input.text().strip()
+        if text and self.ui.on_text_command:
+            self.command_input.clear()
+            self.ui.on_text_command(text)
+
+    @pyqtSlot()
+    def _wake_from_ui(self):
+        self.ui.muted = False
+        if self.ui.on_stop_command:
+            self.ui.on_stop_command()
+        if self.ui.on_wake:
+            self.ui.on_wake()
+        self.show_and_activate()
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if event.type() == event.Type.WindowStateChange:
+            self._sync_visibility()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self._sync_visibility()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._sync_visibility()
+
+    def _sync_visibility(self):
+        if not hasattr(self, "orb") or not self.orb.web_view:
+            return
+        active = self.isVisible() and not self.isMinimized()
+        self.orb.web_view.page().runJavaScript(f"window.setRenderingActive && window.setRenderingActive({str(active).lower()});")
+
     def _handle_stream_text(self, text):
         self.txt_console.setText(text)
         
@@ -1714,7 +1971,7 @@ class MainWindow(QMainWindow):
     def update_theme_styles(self):
         self.central_widget.setStyleSheet(f"""
             QWidget#centralWidget {{
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(28, 21, 6, 0.90), stop:1 rgba(10, 7, 2, 0.90));
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(10, 22, 32, 0.96), stop:1 rgba(5, 12, 20, 0.98));
                 border: 2.2px solid {C_PRI};
                 border-radius: 20px;
             }}
@@ -1753,15 +2010,17 @@ class MainWindow(QMainWindow):
         self.orb.setGeometry(0, 45, W, H - 45)
         
         # Position centered continuous speech line at bottom of HUD
-        self.txt_console.setGeometry(30, H - 60, W - 60, 45)
+        self.txt_console.setGeometry(30, H - 95, W - 60, 45)
+        self.command_input.setGeometry(20, H - 43, W - 40, 32)
         
         # Bento overlay container Y starts lower and ends exactly flush on top of the subtitles (gap-free!)
         bh = H // 3 + 30   # bottom-third height, lower widgets
-        by = H - bh - 60   # positioned flush directly above speech subtitles
+        by = H - bh - 100   # positioned flush directly above speech subtitles
         self.bento_container.setGeometry(15, by, W - 30, bh)
         
         self.bento_container.raise_()
         self.txt_console.raise_()
+        self.command_input.raise_()
         self.clock_w.raise_()
 
     def _open_settings(self):
@@ -1784,10 +2043,14 @@ class MainWindow(QMainWindow):
             
     def _toggle_mute(self):
         self.ui.muted = not self.ui.muted
-        self.orb.set_state("MUTED" if self.ui.muted else "LISTENING")
         if self.ui.muted:
             if self.ui.on_stop_command:
                 self.ui.on_stop_command()
+            self.ui.set_state("MUTED")
+        else:
+            if self.ui.on_wake:
+                self.ui.on_wake()
+            self.ui.set_state("LISTENING")
 
     def _force_camera_off(self):
         """Hard stops the camera and resets UI state."""
@@ -1899,17 +2162,16 @@ class MainWindow(QMainWindow):
 
     def _exit_application(self):
         self._force_close = True
-        if getattr(self, 'camera_window', None):
-            self.camera_window.hide()
+        self.notes_w._save_timer.stop()
+        from core.storage import set_state
+        set_state("notes",self.notes_w.txt_notes.toPlainText())
+        self.stop_gesture_thread()
+        if self.ui.on_shutdown:
+            self.ui.on_shutdown()
         QApplication.quit()
-        import os
-        os._exit(0)
 
     def _handle_shutdown(self):
-        self._force_close = True
-        QApplication.quit()
-        import os
-        os._exit(0)
+        self._exit_application()
 
     def _on_tray_activated(self, reason):
         from PyQt6.QtWidgets import QSystemTrayIcon
@@ -1952,7 +2214,7 @@ class MockRoot:
         self.qapp = qapp
         
     def mainloop(self):
-        sys.exit(self.qapp.exec())
+        self.qapp.exec()
         
     def after(self, ms: int, func):
         QTimer.singleShot(ms, func)
@@ -1965,6 +2227,10 @@ class JarvisUI:
         self.root = MockRoot(self.app)
         
         self.muted = False
+        self.current_state = "SLEEPING"
+        self.on_wake = None
+        self.on_speak = None
+        self.on_shutdown = None
         self.current_file = ""
         
         self.on_text_command = None
@@ -1979,19 +2245,21 @@ class JarvisUI:
         # Ensure startup shortcut is set up after 2 seconds (so it doesn't block startup)
         QTimer.singleShot(2000, self.ensure_startup_shortcut)
         
+    def speak(self, text):
+        if self.on_speak:
+            self.on_speak(text)
+
     def wait_for_api_key(self):
-        pass
+        return
 
     def write_log(self, text: str):
-        pass
+        import logging
+        logging.getLogger("kler.ui").info(str(text))
+        self._win._log_sig.emit(str(text))
         
     def set_state(self, state: str):
-        self._win.orb.set_state(state)
-        if state == "MUTED":
-            self.muted = True
-        elif state in ("LISTENING", "SPEAKING", "THINKING"):
-            if self.muted:
-                self.muted = False
+        self.current_state = state
+        self._win._state_sig.emit("MUTED" if self.muted else state)
                 
     def set_audio_level(self, level: float):
         self._win.orb.set_audio(level)
@@ -2031,7 +2299,7 @@ class JarvisUI:
                 f"$s.TargetPath='{target_vbs}';"
                 f"$s.WorkingDirectory='{current_dir}';"
                 f"$s.IconLocation='{icon_path}';"
-                f"$s.Description='Lanzador Automatico de KLER AI (Admin)';"
+                f"$s.Description='Lanzador de Kler';"
                 f"$s.Save()"
             )
             subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], check=True, creationflags=subprocess.CREATE_NO_WINDOW)

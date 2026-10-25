@@ -14,7 +14,7 @@ MEMORY_PATH = BASE_DIR / "memory" / "long_term.json"
 
 MAX_VALUE_LENGTH = 500
 MEMORY_MAX_CHARS = 4000
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 def _empty_memory() -> dict:
     return {
@@ -39,7 +39,9 @@ def save_memory(memory: dict) -> None:
     with _lock:
         try:
             MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-            MEMORY_PATH.write_text(json.dumps(memory, indent=2), encoding="utf-8")
+            temp = MEMORY_PATH.with_suffix(".tmp")
+            temp.write_text(json.dumps(memory, indent=2), encoding="utf-8")
+            temp.replace(MEMORY_PATH)
         except Exception as e:
             print(f"[Memory] Error saving: {e}")
 
@@ -86,24 +88,25 @@ def _trim_to_limit(mem: dict) -> dict:
 
 def update_memory(updates: dict) -> None:
     """Recursively update the memory with updates, truncating and trimming size limits."""
-    mem = load_memory()
-    # Apply truncation
-    truncated_updates = {}
-    for cat, items in updates.items():
-        truncated_updates[cat] = {}
-        if isinstance(items, dict):
-            for k, val_info in items.items():
-                if isinstance(val_info, dict) and "value" in val_info:
-                    val_str = _truncate_value(str(val_info["value"]))
-                    truncated_updates[cat][k] = {"value": val_str}
-                else:
-                    truncated_updates[cat][k] = _truncate_value(str(val_info))
-        else:
-            truncated_updates[cat] = items
+    with _lock:
+        mem = load_memory()
+        # Apply truncation
+        truncated_updates = {}
+        for cat, items in updates.items():
+            truncated_updates[cat] = {}
+            if isinstance(items, dict):
+                for k, val_info in items.items():
+                    if isinstance(val_info, dict) and "value" in val_info:
+                        val_str = _truncate_value(str(val_info["value"]))
+                        truncated_updates[cat][k] = {"value": val_str}
+                    else:
+                        truncated_updates[cat][k] = _truncate_value(str(val_info))
+            else:
+                truncated_updates[cat] = items
 
-    mem = _recursive_update(mem, truncated_updates)
-    mem = _trim_to_limit(mem)
-    save_memory(mem)
+        mem = _recursive_update(mem, truncated_updates)
+        mem = _trim_to_limit(mem)
+        save_memory(mem)
 
 def remember(category: str, key: str, value: str) -> None:
     """Store a single memory value."""
@@ -111,10 +114,11 @@ def remember(category: str, key: str, value: str) -> None:
 
 def forget(category: str, key: str) -> None:
     """Remove a single memory value."""
-    mem = load_memory()
-    if category in mem and key in mem[category]:
-        del mem[category][key]
-        save_memory(mem)
+    with _lock:
+        mem = load_memory()
+        if category in mem and key in mem[category]:
+            del mem[category][key]
+            save_memory(mem)
 
 def forget_memory() -> None:
     """Clear all memory."""
